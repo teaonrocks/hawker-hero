@@ -121,17 +121,19 @@ This project uses environment variables to manage sensitive information and conf
 
     **_SECURITY NOTE_**: **DO NOT** commit your `.env` file to version control. It is already included in `.gitignore` by default.
 
-<!-- ### Database Setup
+### Database Setup
 
-1.  **Create MySQL Database:**
-    Ensure your MySQL server is running. Create a database with the name specified in your `.env` file (e.g., `c237_studentlistapp`).
-    ```sql
-    CREATE DATABASE c237_studentlistapp;
-    USE c237_studentlistapp;
-    ```
-2.  **Run Migrations/Schema (if available):**
-    You will need to create the tables defined in the project requirements (`stalls`, `food_items`, `reviews`, `recommendations`, `hawker_centers`, `favorites`). If there are SQL schema files (e.g., `.sql` files in a `database/` or `migrations/` folder), execute them to set up your tables.
-    - _(Self-note: Add instructions here if you create actual SQL migration scripts.)_ -->
+1.  **Create MySQL Database and Tables:**
+    Ensure your MySQL server is running. You can create the database and all necessary tables, including seed data, by running the provided SQL script.
+
+    **Using MySQL Workbench (Recommended):**
+
+    - Open MySQL Workbench.
+    - Connect to your MySQL server.
+    - Go to `File > Open SQL Script...`
+    - Navigate to your project directory and select the `database/create_db_with_seed_data.sql` file.
+    - Once the script is open, click the "Execute (all or selection)" button (the lightning bolt icon) in the toolbar.
+    - The script will execute, creating the database and populating it with data. Check the "Output" panel for success messages.
 
 ## ▶️ Running the Application
 
