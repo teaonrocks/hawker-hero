@@ -21,49 +21,16 @@
 				<div class="col-12">
 					<div class="d-flex justify-content-between align-items-center mb-4">
 						<h1><i class="bi bi-lightbulb"></i> Recommendations</h1>
-						<% if (user && user.role === 'admin') { %>
-						<button
-							class="btn btn-primary"
-							data-bs-toggle="modal"
-							data-bs-target="#addRecommendationModal"
-						>
-							<i class="bi bi-plus-circle"></i> Add Recommendation
+						<% if (user) { %>
+						<button class="btn btn-primary">
+							<i class="bi bi-plus-circle"></i> Share Tip
 						</button>
 						<% } %>
 					</div>
 
-					<!-- Search Bar and Filters (Static for now, functionality to be added) -->
-					<div class="row mb-4">
-						<div class="col-md-6">
-							<div class="input-group">
-								<input
-									type="text"
-									class="form-control"
-									placeholder="Search recommendations (stall, user)..."
-								/>
-								<button class="btn btn-primary" type="button">
-									<i class="bi bi-search"></i>
-								</button>
-							</div>
-						</div>
-						<div class="col-md-3">
-							<select class="form-select">
-								<option>All Stalls</option>
-								<!-- Dynamic options could be added here later -->
-							</select>
-						</div>
-						<div class="col-md-3">
-							<select class="form-select">
-								<option>All Users</option>
-								<!-- Dynamic options could be added here later -->
-							</select>
-						</div>
-					</div>
-
 					<!-- Recommendations Grid -->
 					<div class="row">
-						<% if (recommendations && recommendations.length > 0) { %> <%
-						recommendations.forEach(function(rec) { %>
+						<!-- Sample Recommendation -->
 						<div class="col-md-6 mb-4">
 							<div class="card h-100">
 								<div class="card-body">
@@ -72,80 +39,136 @@
 											<i class="bi bi-lightbulb text-white"></i>
 										</div>
 										<div class="flex-grow-1">
-											<h5 class="card-title mb-1"><%= rec.stall_name %></h5>
-											<% if (rec.center_name) { %>
-											<small class="text-muted"><%= rec.center_name %></small>
-											<% } %>
+											<h5 class="card-title mb-1">Ah Liang Chicken Rice</h5>
+											<small class="text-muted">Maxwell Food Centre</small>
 										</div>
 									</div>
-									<% if (rec.food_name) { %>
 									<div class="mb-3">
 										<span class="badge bg-success"
-											><%= rec.food_name %> (Must-Try)</span
+											>Must-Try: Roasted Chicken</span
 										>
 									</div>
-									<% } else { %>
-									<div class="mb-3">
-										<span class="badge bg-info">General Stall Tip</span>
-									</div>
-									<% } %>
-									<p class="card-text">"<%= rec.tip %>"</p>
+									<p class="card-text">
+										"Pro tip: Ask for extra chili sauce on the side! Their
+										homemade chili is what makes this place special. Also, go
+										early around 11 AM to avoid the long queues."
+									</p>
 									<div
 										class="d-flex justify-content-between align-items-center"
 									>
 										<small class="text-muted">
-											<i class="bi bi-person-circle"></i> by <%= rec.username %>
-											• <%= new Date(rec.created_at).toLocaleDateString() %>
+											<i class="bi bi-person-circle"></i> by hawkerfan • 3 days
+											ago
 										</small>
-										<% if (user && user.role === 'admin') { %>
 										<div>
-											<!-- Edit button (opens modal for edit) -->
-											<button
-												class="btn btn-sm btn-outline-secondary me-1"
-												data-bs-toggle="modal"
-												data-bs-target="#editRecommendationModal"
-												data-id="<%= rec.id %>"
-												data-stall-id="<%= rec.stall_id %>"
-												data-food-id="<%= rec.food_id || '' %>"
-												data-tip="<%= rec.tip %>"
-											>
-												<i class="bi bi-pencil-square"></i>
+											<button class="btn btn-sm btn-outline-primary me-1">
+												<i class="bi bi-hand-thumbs-up"></i> 12
 											</button>
-											<!-- Delete button (uses a form for POST request) -->
-											<form
-												action="/recommendations/delete/<%= rec.id %>"
-												method="POST"
-												class="d-inline"
-											>
-												<button
-													type="submit"
-													class="btn btn-sm btn-outline-danger"
-													onclick="return confirm('Are you sure you want to delete this recommendation?');"
-												>
-													<i class="bi bi-trash"></i>
-												</button>
-											</form>
+											<button class="btn btn-sm btn-outline-secondary">
+												<i class="bi bi-reply"></i>
+											</button>
 										</div>
-										<% } %>
 									</div>
 								</div>
 							</div>
 						</div>
-						<% }); %> <% } else { %>
+
+						<!-- Sample Recommendation -->
+						<div class="col-md-6 mb-4">
+							<div class="card h-100">
+								<div class="card-body">
+									<div class="d-flex align-items-start mb-3">
+										<div class="bg-success rounded-circle p-2 me-3">
+											<i class="bi bi-lightbulb text-white"></i>
+										</div>
+										<div class="flex-grow-1">
+											<h5 class="card-title mb-1">Uncle Lim Laksa</h5>
+											<small class="text-muted">Newton Food Centre</small>
+										</div>
+									</div>
+									<div class="mb-3">
+										<span class="badge bg-warning">General Tip</span>
+									</div>
+									<p class="card-text">
+										"If you can't handle spice, ask for 'less spicy' when
+										ordering. The regular version can be quite fiery! The laksa
+										here is best enjoyed with a cold drink."
+									</p>
+									<div
+										class="d-flex justify-content-between align-items-center"
+									>
+										<small class="text-muted">
+											<i class="bi bi-person-circle"></i> by spicylover • 1 week
+											ago
+										</small>
+										<div>
+											<button class="btn btn-sm btn-outline-primary me-1">
+												<i class="bi bi-hand-thumbs-up"></i> 8
+											</button>
+											<button class="btn btn-sm btn-outline-secondary">
+												<i class="bi bi-reply"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Sample Recommendation -->
+						<div class="col-md-6 mb-4">
+							<div class="card h-100">
+								<div class="card-body">
+									<div class="d-flex align-items-start mb-3">
+										<div class="bg-info rounded-circle p-2 me-3">
+											<i class="bi bi-lightbulb text-white"></i>
+										</div>
+										<div class="flex-grow-1">
+											<h5 class="card-title mb-1">
+												Hill Street Fried Kway Teow
+											</h5>
+											<small class="text-muted">Bedok Food Centre</small>
+										</div>
+									</div>
+									<div class="mb-3">
+										<span class="badge bg-primary">Timing Tip</span>
+									</div>
+									<p class="card-text">
+										"Visit during off-peak hours (2-4 PM) for the freshest
+										ingredients and shorter wait times. The uncle is also more
+										generous with the prawns during quieter periods!"
+									</p>
+									<div
+										class="d-flex justify-content-between align-items-center"
+									>
+										<small class="text-muted">
+											<i class="bi bi-person-circle"></i> by localfoodie • 2
+											weeks ago
+										</small>
+										<div>
+											<button class="btn btn-sm btn-outline-primary me-1">
+												<i class="bi bi-hand-thumbs-up"></i> 15
+											</button>
+											<button class="btn btn-sm btn-outline-secondary">
+												<i class="bi bi-reply"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Empty state -->
+						<% if (recommendations.length === 0) { %>
 						<div class="col-12 text-center py-5">
 							<i class="bi bi-lightbulb text-muted" style="font-size: 4rem"></i>
 							<h4 class="mt-3 text-muted">No recommendations yet</h4>
 							<p class="text-muted">
 								Share your insider tips with the community!
 							</p>
-							<% if (user && user.role === 'admin') { %>
-							<button
-								class="btn btn-primary"
-								data-bs-toggle="modal"
-								data-bs-target="#addRecommendationModal"
-							>
-								Add First Recommendation
-							</button>
+							<% if (user) { %>
+							<button class="btn btn-primary">Share First Tip</button>
+							<% } else { %>
+							<a href="/login" class="btn btn-primary">Login to Share Tips</a>
 							<% } %>
 						</div>
 						<% } %>
@@ -154,216 +177,6 @@
 			</div>
 		</div>
 
-		<!-- Add Recommendation Modal (Admin Only) -->
-		<% if (user && user.role === 'admin') { %>
-		<div
-			class="modal fade"
-			id="addRecommendationModal"
-			tabindex="-1"
-			aria-labelledby="addRecommendationModalLabel"
-			aria-hidden="true"
-		>
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="addRecommendationModalLabel">
-							Add New Recommendation
-						</h5>
-						<button
-							type="button"
-							class="btn-close"
-							data-bs-dismiss="modal"
-							aria-label="Close"
-						></button>
-					</div>
-					<form action="/recommendations/add" method="POST">
-						<div class="modal-body">
-							<div class="mb-3">
-								<label for="add_stall_id" class="form-label">Stall</label>
-								<select
-									class="form-select"
-									id="add_stall_id"
-									name="stall_id"
-									required
-								>
-									<option value="">Select a Stall</option>
-									<% if (stalls && stalls.length > 0) { %> <%
-									stalls.forEach(function(stall) { %>
-									<option value="<%= stall.id %>">
-										<%= stall.name %> (<%= stall.center_name %>)
-									</option>
-									<% }); %> <% } %>
-								</select>
-							</div>
-							<div class="mb-3">
-								<label for="add_food_id" class="form-label"
-									>Food Item (Optional)</label
-								>
-								<select class="form-select" id="add_food_id" name="food_id">
-									<option value="">Select a Food Item (Optional)</option>
-									<% if (foodItems && foodItems.length > 0) { %> <%
-									foodItems.forEach(function(item) { %>
-									<option value="<%= item.id %>">
-										<%= item.name %> (<%= item.stall_name %>)
-									</option>
-									<% }); %> <% } %>
-								</select>
-								<div class="form-text">
-									Selecting a food item ties the recommendation to that specific
-									dish within the stall.
-								</div>
-							</div>
-							<div class="mb-3">
-								<label for="add_tip" class="form-label"
-									>Recommendation Tip</label
-								>
-								<textarea
-									class="form-control"
-									id="add_tip"
-									name="tip"
-									rows="3"
-									required
-								></textarea>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button
-								type="button"
-								class="btn btn-secondary"
-								data-bs-dismiss="modal"
-							>
-								Cancel
-							</button>
-							<button type="submit" class="btn btn-primary">
-								Save Recommendation
-							</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-
-		<!-- Edit Recommendation Modal (Admin Only) -->
-		<div
-			class="modal fade"
-			id="editRecommendationModal"
-			tabindex="-1"
-			aria-labelledby="editRecommendationModalLabel"
-			aria-hidden="true"
-		>
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="editRecommendationModalLabel">
-							Edit Recommendation
-						</h5>
-						<button
-							type="button"
-							class="btn-close"
-							data-bs-dismiss="modal"
-							aria-label="Close"
-						></button>
-					</div>
-					<!-- Form will be populated by JavaScript -->
-					<form id="editRecommendationForm" method="POST">
-						<div class="modal-body">
-							<input type="hidden" id="edit_recommendation_id" name="id" />
-							<div class="mb-3">
-								<label for="edit_stall_id" class="form-label">Stall</label>
-								<select
-									class="form-select"
-									id="edit_stall_id"
-									name="stall_id"
-									required
-								>
-									<option value="">Select a Stall</option>
-									<% if (stalls && stalls.length > 0) { %> <%
-									stalls.forEach(function(stall) { %>
-									<option value="<%= stall.id %>">
-										<%= stall.name %> (<%= stall.center_name %>)
-									</option>
-									<% }); %> <% } %>
-								</select>
-							</div>
-							<div class="mb-3">
-								<label for="edit_food_id" class="form-label"
-									>Food Item (Optional)</label
-								>
-								<select class="form-select" id="edit_food_id" name="food_id">
-									<option value="">Select a Food Item (Optional)</option>
-									<% if (foodItems && foodItems.length > 0) { %> <%
-									foodItems.forEach(function(item) { %>
-									<option value="<%= item.id %>">
-										<%= item.name %> (<%= item.stall_name %>)
-									</option>
-									<% }); %> <% } %>
-								</select>
-							</div>
-							<div class="mb-3">
-								<label for="edit_tip" class="form-label"
-									>Recommendation Tip</label
-								>
-								<textarea
-									class="form-control"
-									id="edit_tip"
-									name="tip"
-									rows="3"
-									required
-								></textarea>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button
-								type="button"
-								class="btn btn-secondary"
-								data-bs-dismiss="modal"
-							>
-								Cancel
-							</button>
-							<button type="submit" class="btn btn-primary">
-								Update Recommendation
-							</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-		<% } %>
-
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-		<% if (user && user.role === 'admin') { %>
-		<script>
-			// JavaScript to handle populating the Edit Recommendation modal
-			const editRecommendationModal = document.getElementById(
-				"editRecommendationModal"
-			);
-			if (editRecommendationModal) {
-				editRecommendationModal.addEventListener(
-					"show.bs.modal",
-					function (event) {
-						const button = event.relatedTarget; // Button that triggered the modal
-						const id = button.getAttribute("data-id");
-						const stallId = button.getAttribute("data-stall-id");
-						const foodId = button.getAttribute("data-food-id");
-						const tip = button.getAttribute("data-tip");
-
-						const form = editRecommendationModal.querySelector(
-							"#editRecommendationForm"
-						);
-						form.action = `/recommendations/edit/${id}`; // Set the form action dynamically
-
-						editRecommendationModal.querySelector(
-							"#edit_recommendation_id"
-						).value = id;
-						editRecommendationModal.querySelector("#edit_stall_id").value =
-							stallId;
-						editRecommendationModal.querySelector("#edit_food_id").value =
-							foodId;
-						editRecommendationModal.querySelector("#edit_tip").value = tip;
-					}
-				);
-			}
-		</script>
-		<% } %>
 	</body>
 </html>
