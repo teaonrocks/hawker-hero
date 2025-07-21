@@ -4,48 +4,138 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title><%= title %></title>
+		<!-- Bootstrap CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+			crossorigin="anonymous"
+		/>
 	</head>
 	<body>
 		<header>
-			<h1>Hawker Hero</h1>
-			<nav>
-				<ul>
-					<li><a href="/">Home</a></li>
-					<li><a href="/stalls">Stalls</a></li>
-					<li><a href="/food-items">Food Items</a></li>
-					<li><a href="/reviews">Reviews</a></li>
-					<li><a href="/recommendations">Recommendations</a></li>
-					<li><a href="/hawker-centers">Hawker Centers</a></li>
-					<li><a href="/favorites">Favorites</a></li>
-					<!-- Add login/logout/dashboard links as needed -->
-					<li><a href="/auth/login">Login</a></li>
-				</ul>
+			<!-- Bootstrap Navbar -->
+			<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+				<div class="container">
+					<a class="navbar-brand fw-bold" href="/">Hawker Hero</a>
+
+					<!-- Mobile toggle button -->
+					<button
+						class="navbar-toggler"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#navbarNav"
+						aria-controls="navbarNav"
+						aria-expanded="false"
+						aria-label="Toggle navigation"
+					>
+						<span class="navbar-toggler-icon"></span>
+					</button>
+
+					<!-- Navigation links -->
+					<div class="collapse navbar-collapse" id="navbarNav">
+						<ul class="navbar-nav ms-auto">
+							<li class="nav-item">
+								<a class="nav-link" href="/">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/stalls">Stalls</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/food-items">Food Items</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/reviews">Reviews</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/recommendations">Recommendations</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/hawker-centers">Hawker Centers</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/favorites">Favorites</a>
+							</li>
+							<li class="nav-item">
+								<a
+									class="nav-link btn btn-outline-light ms-2 px-3"
+									href="/auth/login"
+								>
+									Login
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
 			</nav>
 		</header>
 
 		<main>
-			<h2>Welcome to Hawker Hero!</h2>
-			<p>Explore, rate, and recommend Singapore's vibrant hawker scene.</p>
+			<!-- Hero Section -->
+			<div class="bg-light py-5">
+				<div class="container text-center">
+					<h2 class="display-4 fw-bold text-primary mb-3">
+						Welcome to Hawker Hero!
+					</h2>
+					<p class="lead text-muted">
+						Explore, rate, and recommend Singapore's vibrant hawker scene.
+					</p>
+				</div>
+			</div>
 
-			<!--
-        This is where dynamic content for the homepage might go.
-        For example, featured stalls, latest reviews, etc.
-      -->
-			<section class="featured-content">
-				<h3>Featured Stalls</h3>
-				<p>Content coming soon...</p>
-			</section>
+			<!-- Main Content -->
+			<div class="container my-5">
+				<div class="row">
+					<!-- Featured Stalls -->
+					<div class="col-md-6 mb-4">
+						<section class="featured-content">
+							<div class="card h-100">
+								<div class="card-body">
+									<h3 class="card-title h4 text-primary">
+										<i class="bi bi-star-fill"></i> Featured Stalls
+									</h3>
+									<p class="card-text text-muted">Content coming soon...</p>
+									<a href="/stalls" class="btn btn-primary">View All Stalls</a>
+								</div>
+							</div>
+						</section>
+					</div>
 
-			<section class="latest-reviews">
-				<h3>Latest Reviews</h3>
-				<p>Content coming soon...</p>
-			</section>
+					<!-- Latest Reviews -->
+					<div class="col-md-6 mb-4">
+						<section class="latest-reviews">
+							<div class="card h-100">
+								<div class="card-body">
+									<h3 class="card-title h4 text-primary">
+										<i class="bi bi-chat-dots"></i> Latest Reviews
+									</h3>
+									<p class="card-text text-muted">Content coming soon...</p>
+									<a href="/reviews" class="btn btn-primary"
+										>View All Reviews</a
+									>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
 		</main>
 
-		<footer>
-			<p>
-				&copy; <%= new Date().getFullYear() %> Hawker Hero. All rights reserved.
-			</p>
+		<!-- Footer -->
+		<footer class="bg-dark text-light py-4 mt-auto">
+			<div class="container text-center">
+				<p class="mb-0">
+					&copy; <%= new Date().getFullYear() %> Hawker Hero. All rights
+					reserved.
+				</p>
+			</div>
 		</footer>
+
+		<!-- Bootstrap JavaScript -->
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+			crossorigin="anonymous"
+		></script>
 	</body>
 </html>
