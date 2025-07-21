@@ -259,6 +259,7 @@ app.get("/food-items", (req, res) => {
 	});
 });
 
+<<<<<<< HEAD
 // ... (rest of your existing app.js code up to the recommendations routes)
 
 // Recommendations Routes
@@ -311,17 +312,39 @@ app.get("/recommendations", async (req, res) => {
 			await Promise.all([
 				queryDB(sql, params), // Use the dynamically built query
 				queryDB(`
+=======
+app.get("/recommendations", async (req, res) => {
+	try {
+		const [recommendations, stalls, foodItems] = await Promise.all([
+			queryDB(`
+        SELECT r.*, u.username, s.name as stall_name,
+               fi.name as food_name, hc.name as center_name
+        FROM recommendations r
+        JOIN users u ON r.user_id = u.id
+        JOIN stalls s ON r.stall_id = s.id
+        LEFT JOIN food_items fi ON r.food_id = fi.id
+        LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+        ORDER BY r.created_at DESC
+        LIMIT 50
+      `),
+			queryDB(`
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
         SELECT s.id, s.name, hc.name as center_name
         FROM stalls s
         LEFT JOIN hawker_centers hc ON s.center_id = hc.id
         ORDER BY s.name ASC
       `),
+<<<<<<< HEAD
 				queryDB(`
+=======
+			queryDB(`
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
         SELECT fi.id, fi.name, s.name as stall_name
         FROM food_items fi
         JOIN stalls s ON fi.stall_id = s.id
         ORDER BY fi.name ASC
       `),
+<<<<<<< HEAD
 				// Get only users who have made recommendations for the filter dropdown
 				queryDB(`
         SELECT DISTINCT u.id, u.username
@@ -330,6 +353,9 @@ app.get("/recommendations", async (req, res) => {
         ORDER BY u.username ASC
       `),
 			]);
+=======
+		]);
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 
 		res.render("recommendations", {
 			title: "Recommendations - Hawker Hero",
@@ -339,8 +365,11 @@ app.get("/recommendations", async (req, res) => {
 			recommendations: recommendations,
 			stalls: stalls,
 			foodItems: foodItems,
+<<<<<<< HEAD
 			recommendationUsers: recommendationUsers, // Pass users for the dropdown
 			filters: filters, // Pass current filters back to the view
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 		});
 	} catch (err) {
 		console.error("Database error fetching recommendations page data:", err);
@@ -353,14 +382,20 @@ app.get("/recommendations", async (req, res) => {
 			recommendations: [],
 			stalls: [],
 			foodItems: [],
+<<<<<<< HEAD
 			recommendationUsers: [],
 			filters: filters,
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 		});
 	}
 });
 
+<<<<<<< HEAD
 // ... (rest of your app.js code, including POST routes for recommendations)
 
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 // Route to handle adding a new recommendation (Admin Only)
 app.post(
 	"/recommendations/add",
