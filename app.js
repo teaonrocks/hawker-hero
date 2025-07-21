@@ -260,6 +260,7 @@ app.get("/food-items", (req, res) => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // ... (rest of your existing app.js code up to the recommendations routes)
 
 // Recommendations Routes
@@ -313,6 +314,8 @@ app.get("/recommendations", async (req, res) => {
 				queryDB(sql, params), // Use the dynamically built query
 				queryDB(`
 =======
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 app.get("/recommendations", async (req, res) => {
 	try {
 		const [recommendations, stalls, foodItems] = await Promise.all([
@@ -328,6 +331,9 @@ app.get("/recommendations", async (req, res) => {
         LIMIT 50
       `),
 			queryDB(`
+<<<<<<< HEAD
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
+=======
 >>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
         SELECT s.id, s.name, hc.name as center_name
         FROM stalls s
@@ -335,7 +341,11 @@ app.get("/recommendations", async (req, res) => {
         ORDER BY s.name ASC
       `),
 <<<<<<< HEAD
+<<<<<<< HEAD
 				queryDB(`
+=======
+			queryDB(`
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 =======
 			queryDB(`
 >>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
@@ -345,6 +355,7 @@ app.get("/recommendations", async (req, res) => {
         ORDER BY fi.name ASC
       `),
 <<<<<<< HEAD
+<<<<<<< HEAD
 				// Get only users who have made recommendations for the filter dropdown
 				queryDB(`
         SELECT DISTINCT u.id, u.username
@@ -353,6 +364,9 @@ app.get("/recommendations", async (req, res) => {
         ORDER BY u.username ASC
       `),
 			]);
+=======
+		]);
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 =======
 		]);
 >>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
@@ -366,8 +380,11 @@ app.get("/recommendations", async (req, res) => {
 			stalls: stalls,
 			foodItems: foodItems,
 <<<<<<< HEAD
+<<<<<<< HEAD
 			recommendationUsers: recommendationUsers, // Pass users for the dropdown
 			filters: filters, // Pass current filters back to the view
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 =======
 >>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 		});
@@ -383,8 +400,11 @@ app.get("/recommendations", async (req, res) => {
 			stalls: [],
 			foodItems: [],
 <<<<<<< HEAD
+<<<<<<< HEAD
 			recommendationUsers: [],
 			filters: filters,
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 =======
 >>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 		});
@@ -392,8 +412,11 @@ app.get("/recommendations", async (req, res) => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // ... (rest of your app.js code, including POST routes for recommendations)
 
+=======
+>>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 =======
 >>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 // Route to handle adding a new recommendation (Admin Only)
