@@ -50,6 +50,17 @@ app.use(
 app.use(flash());
 app.set("view engine", "ejs");
 
+const queryDB = (sql, params = []) => {
+	return new Promise((resolve, reject) => {
+		db.query(sql, params, (err, results) => {
+			if (err) {
+				return reject(err);
+			}
+			resolve(results);
+		});
+	});
+};
+
 // Middleware to check if user is logged in
 const checkAuthenticated = (req, res, next) => {
 	if (req.session.user) {
