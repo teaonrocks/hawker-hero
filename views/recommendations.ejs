@@ -28,6 +28,60 @@
 						<% } %>
 					</div>
 
+
+<!-- Search and Filter Form -->
+          <form action="/recommendations" method="GET" class="mb-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="search"
+                    placeholder="Search tip, stall, or user..."
+                    value="<%= filters.search %>"
+                  />
+                  <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" name="stall" onchange="this.form.submit()">
+                  <option value="">All Stalls</option>
+                  <% if (stalls && stalls.length > 0) { %>
+                    <% stalls.forEach(function(stall) { %>
+                      <option value="<%= stall.id %>" <%= filters.stall == stall.id ? 'selected' : '' %>>
+                        <%= stall.name %> (<%= stall.center_name %>)
+                      </option>
+                    <% }); %>
+                  <% } %>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" name="user" onchange="this.form.submit()">
+                  <option value="">All Users</option>
+                  <% if (recommendationUsers && recommendationUsers.length > 0) { %>
+                    <% recommendationUsers.forEach(function(recUser) { %>
+                      <option value="<%= recUser.id %>" <%= filters.user == recUser.id ? 'selected' : '' %>>
+                        <%= recUser.username %>
+                      </option>
+                    <% }); %>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+            <% if (filters.search || filters.stall || filters.user) { %>
+              <div class="row mt-2">
+                <div class="col-12">
+                  <a href="/recommendations" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                  </a>
+                </div>
+              </div>
+            <% } %>
+          </form>
+          
 					<!-- Recommendations Grid -->
 					<div class="row">
 						<!-- Sample Recommendation -->
