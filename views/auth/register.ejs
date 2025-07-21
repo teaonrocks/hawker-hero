@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+          <div class="card mt-5 shadow">
+            <div class="card-body">
+              <div class="text-center mb-4">
+                <h2 class="text-primary">Hawker Hero</h2>
+                <p class="text-muted">Create your account</p>
+              </div>
+
+              <!-- Error Messages -->
+              <% if (messages && messages.length > 0) { %>
+                <div class="alert alert-danger" role="alert">
+                  <% messages.forEach(function(message) { %>
+                    <%= message %><br>
+                  <% }); %>
+                </div>
+              <% } %>
+
+              <form method="POST" action="/register">
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="username"
+                    value="<%= formData ? formData.username || '' : '' %>"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    value="<%= formData ? formData.email || '' : '' %>"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    minlength="6"
+                    required
+                  />
+                  <div class="form-text">
+                    Password must be at least 6 characters long.
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="role" class="form-label">Account Type</label>
+                  <select class="form-select" id="role" name="role">
+                    <option value="user" <%= formData && formData.role === 'user' ? 'selected' : '' %>>
+                      Regular User
+                    </option>
+                    <option value="admin" <%= formData && formData.role === 'admin' ? 'selected' : '' %>>
+                      Administrator
+                    </option>
+                  </select>
+                  <div class="form-text">
+                    Choose "Administrator" only if you're setting up admin access.
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                  Create Account
+                </button>
+              </form>
+
+              <div class="text-center">
+                <p class="text-muted">
+                  Already have an account?
+                  <a href="/login" class="text-primary">Sign in</a>
+                </p>
+                <a href="/" class="text-secondary">← Back to Home</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
