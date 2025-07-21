@@ -259,166 +259,17 @@ app.get("/food-items", (req, res) => {
 	});
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// ... (rest of your existing app.js code up to the recommendations routes)
-
-// Recommendations Routes
-app.get("/recommendations", async (req, res) => {
-	// Get filter values from the query string
-	const { search, stall, user } = req.query;
-	const filters = {
-		search: search || "",
-		stall: stall || "",
-		user: user || "",
-	};
-
-	// Base SQL query
-	let sql = `
-    SELECT r.*, u.username, s.name as stall_name,
-           fi.name as food_name, hc.name as center_name
-    FROM recommendations r
-    JOIN users u ON r.user_id = u.id
-    JOIN stalls s ON r.stall_id = s.id
-    LEFT JOIN food_items fi ON r.food_id = fi.id
-    LEFT JOIN hawker_centers hc ON s.center_id = hc.id
-  `;
-
-	// Dynamically build WHERE clause to prevent SQL injection
-	const whereClauses = [];
-	const params = [];
-
-	if (search) {
-		whereClauses.push("(r.tip LIKE ? OR s.name LIKE ? OR u.username LIKE ?)");
-		params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-	}
-	if (stall) {
-		whereClauses.push("r.stall_id = ?");
-		params.push(stall);
-	}
-	if (user) {
-		whereClauses.push("r.user_id = ?");
-		params.push(user);
-	}
-
-	if (whereClauses.length > 0) {
-		sql += ` WHERE ${whereClauses.join(" AND ")}`;
-	}
-
-	sql += " ORDER BY r.created_at DESC LIMIT 50";
-
-	try {
-		// Fetch all necessary data concurrently
-		const [recommendations, stalls, foodItems, recommendationUsers] =
-			await Promise.all([
-				queryDB(sql, params), // Use the dynamically built query
-				queryDB(`
-=======
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-app.get("/recommendations", async (req, res) => {
-	try {
-		const [recommendations, stalls, foodItems] = await Promise.all([
-			queryDB(`
-        SELECT r.*, u.username, s.name as stall_name,
-               fi.name as food_name, hc.name as center_name
-        FROM recommendations r
-        JOIN users u ON r.user_id = u.id
-        JOIN stalls s ON r.stall_id = s.id
-        LEFT JOIN food_items fi ON r.food_id = fi.id
-        LEFT JOIN hawker_centers hc ON s.center_id = hc.id
-        ORDER BY r.created_at DESC
-        LIMIT 50
-      `),
-			queryDB(`
-<<<<<<< HEAD
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-        SELECT s.id, s.name, hc.name as center_name
-        FROM stalls s
-        LEFT JOIN hawker_centers hc ON s.center_id = hc.id
-        ORDER BY s.name ASC
-      `),
-<<<<<<< HEAD
-<<<<<<< HEAD
-				queryDB(`
-=======
-			queryDB(`
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-=======
-			queryDB(`
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-        SELECT fi.id, fi.name, s.name as stall_name
-        FROM food_items fi
-        JOIN stalls s ON fi.stall_id = s.id
-        ORDER BY fi.name ASC
-      `),
-<<<<<<< HEAD
-<<<<<<< HEAD
-				// Get only users who have made recommendations for the filter dropdown
-				queryDB(`
-        SELECT DISTINCT u.id, u.username
-        FROM recommendations r
-        JOIN users u ON r.user_id = u.id
-        ORDER BY u.username ASC
-      `),
-			]);
-=======
-		]);
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-=======
-		]);
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-
-		res.render("recommendations", {
-			title: "Recommendations - Hawker Hero",
-			user: req.session.user,
-			messages: req.flash("success"),
-			errors: req.flash("error"),
-			recommendations: recommendations,
-			stalls: stalls,
-			foodItems: foodItems,
-<<<<<<< HEAD
-<<<<<<< HEAD
-			recommendationUsers: recommendationUsers, // Pass users for the dropdown
-			filters: filters, // Pass current filters back to the view
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-		});
-	} catch (err) {
-		console.error("Database error fetching recommendations page data:", err);
-		req.flash("error", "Failed to load recommendations and related data.");
-		res.render("recommendations", {
-			title: "Recommendations - Hawker Hero",
-			user: req.session.user,
-			messages: req.flash("success"),
-			errors: req.flash("error"),
-			recommendations: [],
-			stalls: [],
-			foodItems: [],
-<<<<<<< HEAD
-<<<<<<< HEAD
-			recommendationUsers: [],
-			filters: filters,
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-		});
-	}
+app.get("/recommendations", (req, res) => {
+	res.render("recommendations", {
+		title: "Recommendations - Hawker Hero",
+		user: req.session.user,
+		messages: req.flash("success"),
+		recommendations: [],
+	});
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // ... (rest of your app.js code, including POST routes for recommendations)
 
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
-=======
->>>>>>> 39ca4f49490920b3fb6eab80a81e3c3800f90163
 // Route to handle adding a new recommendation (Admin Only)
 app.post(
 	"/recommendations/add",
