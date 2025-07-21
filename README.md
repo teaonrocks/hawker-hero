@@ -107,17 +107,17 @@ This project uses environment variables to manage sensitive information and conf
     ```
     # .env
     PORT=3000
-    HOST=localhost
-    USERNAME=root
-    PASSWORD=password
-    DATABASE=database
+    DB_HOST=localhost
+    DB_USERNAME=root
+    DB_PASSWORD=password
+    DB_NAME=database
     ```
 
     - `PORT`: The port your Express server will listen on.
-    - `HOST`: Your MySQL database host (e.g., `localhost`).
-    - `USERNAME`: Your MySQL database username.
-    - `PASSWORD`: Your MySQL database password.
-    - `DATABASE`: The name of your MySQL database.
+    - `DB_HOST`: Your MySQL database host (e.g., `localhost`).
+    - `DB_USERNAME`: Your MySQL database username.
+    - `DB_PASSWORD`: Your MySQL database password.
+    - `DB_NAME`: The name of your MySQL database.
 
     **_SECURITY NOTE_**: **DO NOT** commit your `.env` file to version control. It is already included in `.gitignore` by default.
 
