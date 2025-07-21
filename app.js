@@ -259,14 +259,107 @@ app.get("/food-items", (req, res) => {
 	});
 });
 
-app.get("/recommendations", (req, res) => {
-	res.render("recommendations", {
-		title: "Recommendations - Hawker Hero",
-		user: req.session.user,
-		messages: req.flash("success"),
-		recommendations: [],
-	});
+// ... (rest of your existing app.js code up to the recommendations routes)
+
+// Recommendations Routes
+app.get("/recommendations", async (req, res) => {
+	// Get filter values from the query string
+	const { search, stall, user } = req.query;
+	const filters = {
+		search: search || "",
+		stall: stall || "",
+		user: user || "",
+	};
+
+	// Base SQL query
+	let sql = `
+    SELECT r.*, u.username, s.name as stall_name,
+           fi.name as food_name, hc.name as center_name
+    FROM recommendations r
+    JOIN users u ON r.user_id = u.id
+    JOIN stalls s ON r.stall_id = s.id
+    LEFT JOIN food_items fi ON r.food_id = fi.id
+    LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+  `;
+
+	// Dynamically build WHERE clause to prevent SQL injection
+	const whereClauses = [];
+	const params = [];
+
+	if (search) {
+		whereClauses.push("(r.tip LIKE ? OR s.name LIKE ? OR u.username LIKE ?)");
+		params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+	}
+	if (stall) {
+		whereClauses.push("r.stall_id = ?");
+		params.push(stall);
+	}
+	if (user) {
+		whereClauses.push("r.user_id = ?");
+		params.push(user);
+	}
+
+	if (whereClauses.length > 0) {
+		sql += ` WHERE ${whereClauses.join(" AND ")}`;
+	}
+
+	sql += " ORDER BY r.created_at DESC LIMIT 50";
+
+	try {
+		// Fetch all necessary data concurrently
+		const [recommendations, stalls, foodItems, recommendationUsers] =
+			await Promise.all([
+				queryDB(sql, params), // Use the dynamically built query
+				queryDB(`
+        SELECT s.id, s.name, hc.name as center_name
+        FROM stalls s
+        LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+        ORDER BY s.name ASC
+      `),
+				queryDB(`
+        SELECT fi.id, fi.name, s.name as stall_name
+        FROM food_items fi
+        JOIN stalls s ON fi.stall_id = s.id
+        ORDER BY fi.name ASC
+      `),
+				// Get only users who have made recommendations for the filter dropdown
+				queryDB(`
+        SELECT DISTINCT u.id, u.username
+        FROM recommendations r
+        JOIN users u ON r.user_id = u.id
+        ORDER BY u.username ASC
+      `),
+			]);
+
+		res.render("recommendations", {
+			title: "Recommendations - Hawker Hero",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			recommendations: recommendations,
+			stalls: stalls,
+			foodItems: foodItems,
+			recommendationUsers: recommendationUsers, // Pass users for the dropdown
+			filters: filters, // Pass current filters back to the view
+		});
+	} catch (err) {
+		console.error("Database error fetching recommendations page data:", err);
+		req.flash("error", "Failed to load recommendations and related data.");
+		res.render("recommendations", {
+			title: "Recommendations - Hawker Hero",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			recommendations: [],
+			stalls: [],
+			foodItems: [],
+			recommendationUsers: [],
+			filters: filters,
+		});
+	}
 });
+
+// ... (rest of your app.js code, including POST routes for recommendations)
 
 // ... (rest of your app.js code, including POST routes for recommendations)
 
