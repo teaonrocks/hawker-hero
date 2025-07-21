@@ -1,0 +1,77 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+	<div class="container">
+		<a class="navbar-brand fw-bold" href="/">Hawker Hero</a>
+
+		<button
+			class="navbar-toggler"
+			type="button"
+			data-bs-toggle="collapse"
+			data-bs-target="#navbarNav"
+		>
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav ms-auto">
+				<li class="nav-item">
+					<a class="nav-link" href="/">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/stalls">Stalls</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/food-items">Food Items</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/reviews">Reviews</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/recommendations">Recommendations</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/hawker-centers">Hawker Centers</a>
+				</li>
+
+				<% if (user) { %>
+				<li class="nav-item">
+					<a class="nav-link" href="/favorites">My Favorites</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/dashboard">Dashboard</a>
+				</li>
+				<% if (user.role === 'admin') { %>
+				<li class="nav-item">
+					<a class="nav-link text-warning" href="/admin">Admin</a>
+				</li>
+				<% } %>
+				<li class="nav-item dropdown">
+					<a
+						class="nav-link dropdown-toggle"
+						href="#"
+						role="button"
+						data-bs-toggle="dropdown"
+					>
+						<%= user.username %>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/dashboard">Dashboard</a></li>
+						<li><hr class="dropdown-divider" /></li>
+						<li>
+							<a class="dropdown-item text-danger" href="/logout">Logout</a>
+						</li>
+					</ul>
+				</li>
+				<% } else { %>
+				<li class="nav-item">
+					<a class="nav-link" href="/login">Login</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link btn btn-outline-light ms-2 px-3" href="/register"
+						>Sign Up</a
+					>
+				</li>
+				<% } %>
+			</ul>
+		</div>
+	</div>
+</nav>

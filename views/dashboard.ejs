@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title><%= title %></title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+			rel="stylesheet"
+		/>
+	</head>
+	<body class="bg-light">
+		<!-- Navigation -->
+		<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+			<div class="container">
+				<a class="navbar-brand fw-bold" href="/">Hawker Hero</a>
+
+				<button
+					class="navbar-toggler"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#navbarNav"
+				>
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav ms-auto">
+						<li class="nav-item">
+							<a class="nav-link" href="/">Home</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/stalls">Stalls</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/favorites">Favorites</a>
+						</li>
+						<li class="nav-item dropdown">
+							<a
+								class="nav-link dropdown-toggle"
+								href="#"
+								role="button"
+								data-bs-toggle="dropdown"
+							>
+								<%= user.username %>
+							</a>
+							<ul class="dropdown-menu">
+								<li>
+									<a class="dropdown-item" href="/dashboard">Dashboard</a>
+								</li>
+								<li><hr class="dropdown-divider" /></li>
+								<li><a class="dropdown-item" href="/logout">Logout</a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+		<!-- Main Content -->
+		<div class="container mt-4">
+			<!-- Flash Messages -->
+			<% if (messages && messages.length > 0) { %>
+			<div class="alert alert-success alert-dismissible fade show" role="alert">
+				<% messages.forEach(function(message) { %>
+				<div><%= message %></div>
+				<% }); %>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="alert"
+				></button>
+			</div>
+			<% } %> <% if (errors && errors.length > 0) { %>
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				<% errors.forEach(function(error) { %>
+				<div><%= error %></div>
+				<% }); %>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="alert"
+				></button>
+			</div>
+			<% } %>
+
+			<!-- Welcome Section -->
+			<div class="row mb-4">
+				<div class="col-12">
+					<div class="card bg-primary text-white">
+						<div class="card-body">
+							<div class="row align-items-center">
+								<div class="col-md-8">
+									<h1 class="mb-2">Welcome back, <%= user.username %>!</h1>
+									<p class="mb-0">
+										Ready to discover more amazing hawker food? Here's your
+										activity summary.
+									</p>
+								</div>
+								<div class="col-md-4 text-end">
+									<i class="bi bi-person-circle" style="font-size: 4rem"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Statistics Cards -->
+			<div class="row mb-4">
+				<div class="col-md-4">
+					<div class="card text-center h-100">
+						<div class="card-body">
+							<i
+								class="bi bi-star-fill text-warning"
+								style="font-size: 2rem"
+							></i>
+							<h3 class="mt-2">12</h3>
+							<p class="text-muted">Reviews Written</p>
+							<a href="/reviews" class="btn btn-sm btn-outline-primary"
+								>View All</a
+							>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="card text-center h-100">
+						<div class="card-body">
+							<i
+								class="bi bi-heart-fill text-danger"
+								style="font-size: 2rem"
+							></i>
+							<h3 class="mt-2">8</h3>
+							<p class="text-muted">Favorites Saved</p>
+							<a href="/favorites" class="btn btn-sm btn-outline-primary"
+								>View All</a
+							>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="card text-center h-100">
+						<div class="card-body">
+							<i
+								class="bi bi-lightbulb-fill text-success"
+								style="font-size: 2rem"
+							></i>
+							<h3 class="mt-2">5</h3>
+							<p class="text-muted">Recommendations</p>
+							<a href="/recommendations" class="btn btn-sm btn-outline-primary"
+								>View All</a
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Quick Actions -->
+			<div class="row mb-4">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title mb-3">
+								<i class="bi bi-lightning-charge"></i> Quick Actions
+							</h5>
+							<div class="row">
+								<div class="col-md-3 mb-2">
+									<a href="/stalls" class="btn btn-outline-primary w-100">
+										<i class="bi bi-shop"></i> Browse Stalls
+									</a>
+								</div>
+								<div class="col-md-3 mb-2">
+									<a
+										href="/hawker-centers"
+										class="btn btn-outline-primary w-100"
+									>
+										<i class="bi bi-building"></i> Find Centers
+									</a>
+								</div>
+								<div class="col-md-3 mb-2">
+									<a href="/food-items" class="btn btn-outline-primary w-100">
+										<i class="bi bi-cup-hot"></i> Browse Menu
+									</a>
+								</div>
+								<div class="col-md-3 mb-2">
+									<a href="/reviews" class="btn btn-primary w-100">
+										<i class="bi bi-pencil-square"></i> Write Review
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<!-- Recent Reviews Section -->
+				<div class="col-md-6 mb-4">
+					<div class="card h-100">
+						<div class="card-header">
+							<h5 class="mb-0">
+								<i class="bi bi-chat-dots"></i> Your Recent Reviews
+							</h5>
+						</div>
+						<div class="card-body">
+							<!-- Sample Review Items -->
+							<div class="border-bottom pb-3 mb-3">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<h6 class="mb-1">Ah Liang Chicken Rice</h6>
+										<small class="text-muted">Maxwell Food Centre</small>
+									</div>
+									<div class="text-end">
+										<div class="text-warning">
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star"></i>
+										</div>
+										<small class="text-muted">2 days ago</small>
+									</div>
+								</div>
+								<p class="mb-0 mt-2 small text-muted">
+									"Great chicken rice with tender meat and fragrant rice..."
+								</p>
+							</div>
+
+							<div class="border-bottom pb-3 mb-3">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<h6 class="mb-1">Uncle Lim Laksa</h6>
+										<small class="text-muted">Newton Food Centre</small>
+									</div>
+									<div class="text-end">
+										<div class="text-warning">
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+											<i class="bi bi-star-fill"></i>
+										</div>
+										<small class="text-muted">1 week ago</small>
+									</div>
+								</div>
+								<p class="mb-0 mt-2 small text-muted">
+									"Absolutely amazing laksa! Rich broth and fresh
+									ingredients..."
+								</p>
+							</div>
+
+							<div class="text-center">
+								<a href="/reviews" class="btn btn-sm btn-primary"
+									>View All Reviews</a
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Recent Favorites Section -->
+				<div class="col-md-6 mb-4">
+					<div class="card h-100">
+						<div class="card-header">
+							<h5 class="mb-0">
+								<i class="bi bi-heart"></i> Your Recent Favorites
+							</h5>
+						</div>
+						<div class="card-body">
+							<!-- Sample Favorite Items -->
+							<div class="border-bottom pb-3 mb-3">
+								<div class="d-flex align-items-center">
+									<div class="me-3">
+										<div
+											class="bg-light rounded d-flex align-items-center justify-content-center"
+											style="width: 50px; height: 50px"
+										>
+											<i class="bi bi-image text-muted"></i>
+										</div>
+									</div>
+									<div class="flex-grow-1">
+										<h6 class="mb-1">Hainanese Chicken Rice</h6>
+										<small class="text-muted"
+											>Tian Tian • Maxwell Food Centre</small
+										>
+										<p class="mb-0 mt-1 small text-muted">
+											<i class="bi bi-sticky"></i> Must try the roasted chicken!
+										</p>
+									</div>
+								</div>
+							</div>
+
+							<div class="border-bottom pb-3 mb-3">
+								<div class="d-flex align-items-center">
+									<div class="me-3">
+										<div
+											class="bg-light rounded d-flex align-items-center justify-content-center"
+											style="width: 50px; height: 50px"
+										>
+											<i class="bi bi-image text-muted"></i>
+										</div>
+									</div>
+									<div class="flex-grow-1">
+										<h6 class="mb-1">Char Kway Teow</h6>
+										<small class="text-muted"
+											>Hill Street Fried Kway Teow • Bedok Food Centre</small
+										>
+										<p class="mb-0 mt-1 small text-muted">
+											<i class="bi bi-sticky"></i> Extra spicy is the way to go
+										</p>
+									</div>
+								</div>
+							</div>
+
+							<div class="text-center">
+								<a href="/favorites" class="btn btn-sm btn-primary"
+									>View All Favorites</a
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Activity Feed Section -->
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="mb-0">
+								<i class="bi bi-activity"></i> Recent Activity
+							</h5>
+						</div>
+						<div class="card-body">
+							<div class="list-group list-group-flush">
+								<div class="list-group-item border-0 px-0">
+									<div class="d-flex align-items-center">
+										<div class="me-3">
+											<i class="bi bi-star-fill text-warning"></i>
+										</div>
+										<div class="flex-grow-1">
+											<p class="mb-0">
+												You reviewed <strong>Ah Liang Chicken Rice</strong>
+											</p>
+											<small class="text-muted">2 days ago</small>
+										</div>
+									</div>
+								</div>
+
+								<div class="list-group-item border-0 px-0">
+									<div class="d-flex align-items-center">
+										<div class="me-3">
+											<i class="bi bi-heart-fill text-danger"></i>
+										</div>
+										<div class="flex-grow-1">
+											<p class="mb-0">
+												You added <strong>Char Kway Teow</strong> to favorites
+											</p>
+											<small class="text-muted">3 days ago</small>
+										</div>
+									</div>
+								</div>
+
+								<div class="list-group-item border-0 px-0">
+									<div class="d-flex align-items-center">
+										<div class="me-3">
+											<i class="bi bi-lightbulb-fill text-success"></i>
+										</div>
+										<div class="flex-grow-1">
+											<p class="mb-0">
+												You shared a recommendation for
+												<strong>Uncle Lim Laksa</strong>
+											</p>
+											<small class="text-muted">1 week ago</small>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Bootstrap JS -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
+</html>

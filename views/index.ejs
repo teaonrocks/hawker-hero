@@ -53,17 +53,70 @@
 							<li class="nav-item">
 								<a class="nav-link" href="/hawker-centers">Hawker Centers</a>
 							</li>
+
+							<!-- Conditional Navigation based on Authentication -->
+							<% if (user) { %>
+							<!-- Authenticated User Navigation -->
 							<li class="nav-item">
-								<a class="nav-link" href="/favorites">Favorites</a>
+								<a class="nav-link" href="/favorites">My Favorites</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/dashboard">Dashboard</a>
+							</li>
+
+							<!-- Admin Link (if user is admin) -->
+							<% if (user.role === 'admin') { %>
+							<li class="nav-item">
+								<a class="nav-link text-warning" href="/admin">
+									<i class="bi bi-gear"></i> Admin
+								</a>
+							</li>
+							<% } %>
+
+							<!-- User Dropdown -->
+							<li class="nav-item dropdown">
+								<a
+									class="nav-link dropdown-toggle"
+									href="#"
+									role="button"
+									data-bs-toggle="dropdown"
+									aria-expanded="false"
+								>
+									Welcome, <%= user.username %>
+								</a>
+								<ul class="dropdown-menu">
+									<li>
+										<a class="dropdown-item" href="/dashboard">
+											<i class="bi bi-person"></i> My Profile
+										</a>
+									</li>
+									<li>
+										<a class="dropdown-item" href="/favorites">
+											<i class="bi bi-heart"></i> My Favorites
+										</a>
+									</li>
+									<li><hr class="dropdown-divider" /></li>
+									<li>
+										<a class="dropdown-item text-danger" href="/logout">
+											<i class="bi bi-box-arrow-right"></i> Logout
+										</a>
+									</li>
+								</ul>
+							</li>
+							<% } else { %>
+							<!-- Guest User Navigation -->
+							<li class="nav-item">
+								<a class="nav-link" href="/login">Login</a>
 							</li>
 							<li class="nav-item">
 								<a
 									class="nav-link btn btn-outline-light ms-2 px-3"
-									href="/auth/login"
+									href="/register"
 								>
-									Login
+									Sign Up
 								</a>
 							</li>
+							<% } %>
 						</ul>
 					</div>
 				</div>
@@ -71,15 +124,60 @@
 		</header>
 
 		<main>
+			<!-- Flash Messages -->
+			<% if (messages && messages.length > 0) { %>
+			<div class="container mt-3">
+				<div
+					class="alert alert-success alert-dismissible fade show"
+					role="alert"
+				>
+					<% messages.forEach(function(message) { %>
+					<div><%= message %></div>
+					<% }); %>
+					<button
+						type="button"
+						class="btn-close"
+						data-bs-dismiss="alert"
+						aria-label="Close"
+					></button>
+				</div>
+			</div>
+			<% } %>
+
 			<!-- Hero Section -->
 			<div class="bg-light py-5">
 				<div class="container text-center">
+					<% if (user) { %>
+					<h2 class="display-4 fw-bold text-primary mb-3">
+						Welcome back, <%= user.username %>!
+					</h2>
+					<p class="lead text-muted">
+						Ready to explore Singapore's vibrant hawker scene?
+					</p>
+					<div class="mt-4">
+						<a href="/stalls" class="btn btn-primary btn-lg me-3">
+							Browse Stalls
+						</a>
+						<a href="/favorites" class="btn btn-outline-primary btn-lg">
+							View My Favorites
+						</a>
+					</div>
+					<% } else { %>
 					<h2 class="display-4 fw-bold text-primary mb-3">
 						Welcome to Hawker Hero!
 					</h2>
 					<p class="lead text-muted">
 						Explore, rate, and recommend Singapore's vibrant hawker scene.
 					</p>
+					<div class="mt-4">
+						<a href="/register" class="btn btn-primary btn-lg me-3">
+							Join Now - It's Free!
+						</a>
+						<a href="/stalls" class="btn btn-outline-primary btn-lg">
+							Browse as Guest
+						</a>
+					</div>
+					<% } %>
 				</div>
 			</div>
 
@@ -89,13 +187,16 @@
 					<!-- Featured Stalls -->
 					<div class="col-md-6 mb-4">
 						<section class="featured-content">
-							<div class="card h-100">
+							<div class="card h-100 shadow-sm">
 								<div class="card-body">
-									<h3 class="card-title h4 text-primary">
+									<h3 class="card-title h4 text-primary mb-3">
 										<i class="bi bi-star-fill"></i> Featured Stalls
 									</h3>
-									<p class="card-text text-muted">Content coming soon...</p>
-									<a href="/stalls" class="btn btn-primary">View All Stalls</a>
+									<p class="card-text text-muted mb-3">
+										Discover the most popular and highly-rated hawker stalls
+										across Singapore.
+									</p>
+									<a href="/stalls" class="btn btn-primary"> Explore Stalls </a>
 								</div>
 							</div>
 						</section>
@@ -104,20 +205,99 @@
 					<!-- Latest Reviews -->
 					<div class="col-md-6 mb-4">
 						<section class="latest-reviews">
-							<div class="card h-100">
+							<div class="card h-100 shadow-sm">
 								<div class="card-body">
-									<h3 class="card-title h4 text-primary">
+									<h3 class="card-title h4 text-primary mb-3">
 										<i class="bi bi-chat-dots"></i> Latest Reviews
 									</h3>
-									<p class="card-text text-muted">Content coming soon...</p>
-									<a href="/reviews" class="btn btn-primary"
-										>View All Reviews</a
-									>
+									<p class="card-text text-muted mb-3">
+										Read what fellow food enthusiasts are saying about their
+										hawker experiences.
+									</p>
+									<a href="/reviews" class="btn btn-primary"> Read Reviews </a>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- Hawker Centers -->
+					<div class="col-md-6 mb-4">
+						<section class="hawker-centers">
+							<div class="card h-100 shadow-sm">
+								<div class="card-body">
+									<h3 class="card-title h4 text-primary mb-3">
+										<i class="bi bi-building"></i> Hawker Centers
+									</h3>
+									<p class="card-text text-muted mb-3">
+										Find hawker centers near you with complete facility
+										information.
+									</p>
+									<a href="/hawker-centers" class="btn btn-primary">
+										Find Centers
+									</a>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- Food Items -->
+					<div class="col-md-6 mb-4">
+						<section class="food-items">
+							<div class="card h-100 shadow-sm">
+								<div class="card-body">
+									<h3 class="card-title h4 text-primary mb-3">
+										<i class="bi bi-cup-hot"></i> Food Items
+									</h3>
+									<p class="card-text text-muted mb-3">
+										Browse through thousands of delicious dishes and their
+										prices.
+									</p>
+									<a href="/food-items" class="btn btn-primary">
+										Browse Menu
+									</a>
 								</div>
 							</div>
 						</section>
 					</div>
 				</div>
+
+				<!-- User-specific content -->
+				<% if (user) { %>
+				<div class="row mt-5">
+					<div class="col-12">
+						<div class="card bg-light">
+							<div class="card-body text-center">
+								<h4 class="text-primary mb-3">Quick Actions</h4>
+								<div class="row">
+									<div class="col-md-3 mb-2">
+										<a href="/favorites" class="btn btn-outline-primary w-100">
+											<i class="bi bi-heart"></i><br />My Favorites
+										</a>
+									</div>
+									<div class="col-md-3 mb-2">
+										<a
+											href="/recommendations"
+											class="btn btn-outline-primary w-100"
+										>
+											<i class="bi bi-lightbulb"></i><br />Recommendations
+										</a>
+									</div>
+									<div class="col-md-3 mb-2">
+										<a href="/reviews" class="btn btn-outline-primary w-100">
+											<i class="bi bi-chat-square-text"></i><br />Write Review
+										</a>
+									</div>
+									<div class="col-md-3 mb-2">
+										<a href="/dashboard" class="btn btn-outline-primary w-100">
+											<i class="bi bi-person-circle"></i><br />My Dashboard
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<% } %>
 			</div>
 		</main>
 
