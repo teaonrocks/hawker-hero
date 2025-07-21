@@ -259,14 +259,143 @@ app.get("/food-items", (req, res) => {
 	});
 });
 
-app.get("/recommendations", (req, res) => {
-	res.render("recommendations", {
-		title: "Recommendations - Hawker Hero",
-		user: req.session.user,
-		messages: req.flash("success"),
-		recommendations: [],
-	});
+app.get("/recommendations", async (req, res) => {
+	try {
+		const [recommendations, stalls, foodItems] = await Promise.all([
+			queryDB(`
+        SELECT r.*, u.username, s.name as stall_name,
+               fi.name as food_name, hc.name as center_name
+        FROM recommendations r
+        JOIN users u ON r.user_id = u.id
+        JOIN stalls s ON r.stall_id = s.id
+        LEFT JOIN food_items fi ON r.food_id = fi.id
+        LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+        ORDER BY r.created_at DESC
+        LIMIT 50
+      `),
+			queryDB(`
+        SELECT s.id, s.name, hc.name as center_name
+        FROM stalls s
+        LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+        ORDER BY s.name ASC
+      `),
+			queryDB(`
+        SELECT fi.id, fi.name, s.name as stall_name
+        FROM food_items fi
+        JOIN stalls s ON fi.stall_id = s.id
+        ORDER BY fi.name ASC
+      `),
+		]);
+
+		res.render("recommendations", {
+			title: "Recommendations - Hawker Hero",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			recommendations: recommendations,
+			stalls: stalls,
+			foodItems: foodItems,
+		});
+	} catch (err) {
+		console.error("Database error fetching recommendations page data:", err);
+		req.flash("error", "Failed to load recommendations and related data.");
+		res.render("recommendations", {
+			title: "Recommendations - Hawker Hero",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			recommendations: [],
+			stalls: [],
+			foodItems: [],
+		});
+	}
 });
+
+// Route to handle adding a new recommendation (Admin Only)
+app.post(
+	"/recommendations/add",
+	checkAuthenticated,
+	checkAdmin,
+	async (req, res) => {
+		const { stall_id, food_id, tip } = req.body;
+		const user_id = req.session.user.id; // Admin's user ID
+
+		if (!stall_id || !tip) {
+			req.flash("error", "Stall and Tip are required to add a recommendation.");
+			return res.redirect("/recommendations");
+		}
+
+		try {
+			const insertSql =
+				"INSERT INTO recommendations (user_id, stall_id, food_id, tip, created_at) VALUES (?, ?, ?, ?, NOW())";
+			// Convert food_id to null if it's an empty string
+			const actualFoodId = food_id === "" ? null : food_id;
+			await queryDB(insertSql, [user_id, stall_id, actualFoodId, tip]);
+
+			req.flash("success", "Recommendation added successfully!");
+			res.redirect("/recommendations");
+		} catch (err) {
+			console.error("Database error adding recommendation:", err);
+			req.flash("error", "Failed to add recommendation. Please try again.");
+			res.redirect("/recommendations");
+		}
+	}
+);
+
+// Route to handle updating a recommendation (Admin Only)
+app.post(
+	"/recommendations/edit/:id",
+	checkAuthenticated,
+	checkAdmin,
+	async (req, res) => {
+		const { id } = req.params;
+		const { stall_id, food_id, tip } = req.body;
+
+		if (!stall_id || !tip) {
+			req.flash(
+				"error",
+				"Stall and Tip are required to update a recommendation."
+			);
+			return res.redirect("/recommendations");
+		}
+
+		try {
+			const updateSql =
+				"UPDATE recommendations SET stall_id = ?, food_id = ?, tip = ? WHERE id = ?";
+			const actualFoodId = food_id === "" ? null : food_id;
+			await queryDB(updateSql, [stall_id, actualFoodId, tip, id]);
+
+			req.flash("success", `Recommendation ID ${id} updated successfully!`);
+			res.redirect("/recommendations");
+		} catch (err) {
+			console.error("Database error updating recommendation:", err);
+			req.flash("error", "Failed to update recommendation. Please try again.");
+			res.redirect("/recommendations");
+		}
+	}
+);
+
+// Route to handle deleting a recommendation (Admin Only)
+app.post(
+	"/recommendations/delete/:id",
+	checkAuthenticated,
+	checkAdmin,
+	async (req, res) => {
+		const { id } = req.params;
+
+		try {
+			const deleteSql = "DELETE FROM recommendations WHERE id = ?";
+			await queryDB(deleteSql, [id]);
+
+			req.flash("success", `Recommendation ID ${id} deleted successfully!`);
+			res.redirect("/recommendations");
+		} catch (err) {
+			console.error("Database error deleting recommendation:", err);
+			req.flash("error", "Failed to delete recommendation. Please try again.");
+			res.redirect("/recommendations");
+		}
+	}
+);
 
 app.get("/logout", (req, res) => {
 	req.session.destroy((err) => {
