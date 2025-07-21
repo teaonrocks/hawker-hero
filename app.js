@@ -50,6 +50,19 @@ app.use(
 app.use(flash());
 app.set("view engine", "ejs");
 
+// Helper function to promisify db.query
+// IMPORTANT: This needs to be defined BEFORE it's used in your routes.
+const queryDB = (sql, params = []) => {
+	return new Promise((resolve, reject) => {
+		db.query(sql, params, (err, results) => {
+			if (err) {
+				return reject(err);
+			}
+			resolve(results);
+		});
+	});
+};
+
 // Middleware to check if user is logged in
 const checkAuthenticated = (req, res, next) => {
 	if (req.session.user) {
@@ -248,7 +261,6 @@ app.get("/food-items", (req, res) => {
 	});
 });
 
-
 // ... (rest of your existing app.js code up to the recommendations routes)
 
 // Recommendations Routes
@@ -349,10 +361,6 @@ app.get("/recommendations", async (req, res) => {
 	}
 });
 
-// ... (rest of your app.js code, including POST routes for recommendations)
-
-// ... (rest of your app.js code, including POST routes for recommendations)
-
 // Route to handle adding a new recommendation (Admin Only)
 app.post(
 	"/recommendations/add",
@@ -438,15 +446,6 @@ app.post(
 		}
 	}
 );
-
-app.get("/logout", (req, res) => {
-	req.session.destroy((err) => {
-		if (err) {
-			console.error("Logout error:", err);
-		}
-		res.redirect("/");
-	});
-});
 
 app.listen(process.env.PORT || 3000, () => {
 	console.log(
