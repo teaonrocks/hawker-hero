@@ -221,6 +221,48 @@ app.get("/stalls", (req, res) => {
 	});
 });
 
+// Add new stall (form)
+app.get('/stalls/new', (req, res) => {
+	res.render('stalls-new', { title: 'Add Stall' });
+  });
+  
+  // Create stall
+  app.post('/stalls', (req, res) => {
+	const { name, location, cuisine } = req.body;
+	db.query('INSERT INTO stalls (name, location, cuisine) VALUES (?, ?, ?)', [name, location, cuisine], (err) => {
+	  if (err) throw err;
+	  res.redirect('/stalls');
+	});
+  });
+  
+  // Edit stall (form)
+  app.get('/stalls/:id/edit', (req, res) => {
+	const { id } = req.params;
+	db.query('SELECT * FROM stalls WHERE id = ?', [id], (err, results) => {
+	  if (err) throw err;
+	  res.render('stalls-edit', { stall: results[0], title: 'Edit Stall' });
+	});
+  });
+  
+  // Update stall
+  app.put('/stalls/:id', (req, res) => {
+	const { id } = req.params;
+	const { name, location, cuisine } = req.body;
+	db.query('UPDATE stalls SET name = ?, location = ?, cuisine = ? WHERE id = ?', [name, location, cuisine, id], (err) => {
+	  if (err) throw err;
+	  res.redirect('/stalls');
+	});
+  });
+  
+  // Delete stall
+  app.delete('/stalls/:id', (req, res) => {
+	const { id } = req.params;
+	db.query('DELETE FROM stalls WHERE id = ?', [id], (err) => {
+	  if (err) throw err;
+	  res.redirect('/stalls');
+	});
+  });
+
 app.get("/hawker-centers", (req, res) => {
 	res.render("hawker-centers", {
 		title: "Hawker Centers - Hawker Hero",
