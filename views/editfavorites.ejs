@@ -15,33 +15,31 @@
     <h1 class="mb-4"><i class="bi bi-pencil-square"></i> Edit Favorite</h1>
 
     <form action="/favorites/edit/<%= favorite.id %>" method="POST">
-      <!-- Hidden IDs -->
       <input type="hidden" name="stall_id" value="<%= favorite.stall_id %>" />
       <input type="hidden" name="food_id" value="<%= favorite.food_id %>" />
 
-      <!-- Stall Display -->
       <div class="mb-3">
         <label class="form-label">Stall</label>
         <input
           type="text"
           class="form-control"
-          value="<%= favorite.stall_name || 'N/A' %>"
+          value="<%= favorite.stall_id %>"
           readonly
         />
+        <div class="form-text">Current Stall: <strong><%= favorite.stall_name || 'N/A' %></strong></div>
       </div>
 
-      <!-- Food Item Display -->
       <div class="mb-3">
         <label class="form-label">Food Item</label>
         <input
           type="text"
           class="form-control"
-          value="<%= favorite.food_name || 'N/A' %>"
+          value="<%= favorite.food_id || '' %>"
           readonly
         />
+        <div class="form-text">Current Food: <strong><%= favorite.food_name || 'N/A' %></strong></div>
       </div>
 
-      <!-- Notes -->
       <div class="mb-3">
         <label for="notes" class="form-label">Notes</label>
         <textarea
@@ -53,7 +51,6 @@
         ><%= favorite.notes || '' %></textarea>
       </div>
 
-      <!-- Actions -->
       <button type="submit" class="btn btn-primary">
         <i class="bi bi-save"></i> Save Changes
       </button>

@@ -57,13 +57,9 @@
                         <a href="/favorites/edit/<%= favorite.id %>" class="btn btn-sm btn-outline-primary">
                           <i class="bi bi-pencil-square"></i> Edit
                         </a>
-                        
-                        <form method="POST" action="/favorites/delete/<%= favorite.id %>" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this favorite?');">
-                          <input type="hidden" name="redirect_to" value="/favorites" />
-                          <button type="submit" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i> Remove
-                          </button>
-                        </form>
+                        <a href="/favorites/delete/<%= favorite.id %>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to remove this favorite?');">
+                          <i class="bi bi-trash"></i> Remove
+                        </a>
                       <% } %>
                     </div>
                   </div>
