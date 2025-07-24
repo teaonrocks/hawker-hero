@@ -10,10 +10,11 @@ const app = express();
 // Setup for file uploads
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, "public/images");
+		cb(null, "public/images/stalls");
 	},
 	filename: (req, file, cb) => {
-		cb(null, file.originalname);
+		const uniqueName = Date.now() + "-" + file.originalname;
+    	cb(null, uniqueName);
 	},
 });
 const upload = multer({ storage });
@@ -466,7 +467,7 @@ app.get("/stalls", (req, res) => {
 	const cuisineQuery = "SELECT DISTINCT cuisine FROM stalls";
 	db.query(cuisineQuery, (err, cuisineResults) => {
 	  if (err) throw err;
-	  const cuisineList = cuisineResults.map(row => row.cuisine);
+	  const cuisineList = cuisineResults; // ✅ just use the full array
 
 	  let sql = "SELECT * FROM stalls WHERE 1=1";
 	  const params = [];
@@ -504,17 +505,54 @@ app.get("/stalls", (req, res) => {
   
 
 app.get("/stalls/new", checkAuthenticated, checkAdmin, (req, res) => {
-	res.render("stalls-new", { title: "Add Stall" });
+	res.render("stalls-new", {
+		title: "Add Stall",
+		user: req.session.user  
+	  });
 });
 
-app.post("/stalls", checkAuthenticated, checkAdmin, (req, res) => {
+app.post("/stalls", checkAuthenticated, checkAdmin, upload.single("image"), (req, res) => {
 	const { name, location, cuisine } = req.body;
-	db.query("INSERT INTO stalls (name, location, cuisine) VALUES (?, ?, ?)", [name, location, cuisine], (err) => {
-		if (err) throw err;
-		res.redirect("/stalls");
+	const image = req.file ? req.file.filename : null;
+  
+	db.query("INSERT INTO stalls (name, location, cuisine, image) VALUES (?, ?, ?, ?)", 
+	  [name, location, cuisine, image], (err) => {
+	  if (err) throw err;
+	  res.redirect("/stalls");
 	});
-});
-
+  });
+  
+  app.get("/stalls/:id", async (req, res) => {
+	const { id } = req.params;
+  
+	try {
+	  const stallSql = "SELECT * FROM stalls WHERE id = ?";
+	  const [stall] = await queryDB(stallSql, [id]);
+  
+	  if (!stall) {
+		req.flash("error", "Stall not found.");
+		return res.redirect("/stalls");
+	  }
+  
+	  // Optional: fetch food items for this stall
+	  const foodItemsSql = "SELECT * FROM food_items WHERE stall_id = ?";
+	  const foodItems = await queryDB(foodItemsSql, [id]);
+  
+	  res.render("stall-detail", {
+		title: stall.name + " - Hawker Hero",
+		user: req.session.user,
+		stall,
+		foodItems,
+		messages: req.flash("success"),
+		errors: req.flash("error"),
+	  });
+	} catch (err) {
+	  console.error("Error loading stall detail:", err);
+	  req.flash("error", "Error loading stall page.");
+	  res.redirect("/stalls");
+	}
+  });
+  
 app.get("/stalls/:id/edit", checkAuthenticated, checkAdmin, (req, res) => {
 	const { id } = req.params;
 	db.query("SELECT * FROM stalls WHERE id = ?", [id], (err, results) => {

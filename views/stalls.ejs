@@ -29,7 +29,7 @@
 			<option value="">All Cuisines</option>
 			<% if (Array.isArray(cuisines) && cuisines.length > 0) { %>
 			  <% cuisines.forEach(c => { %>
-				<option value="<%= c %>" <%= query?.cuisine === c ? 'selected' : '' %>><%= c %></option>
+          <option value="<%= c %>" <%= query?.cuisine === c ? 'selected' : '' %>><%= c %></option>
 			  <% }) %>
 			<% } else { %>
 			  <option disabled>No cuisines found</option>
@@ -51,13 +51,13 @@
       <% stalls.forEach(stall => { %>
         <div class="col-md-4 mb-4">
           <div class="card h-100">
-            <% if (stall.image_url) { %>
-              <img src="<%= stall.image_url %>" class="card-img-top" alt="<%= stall.name %>" style="height: 200px; object-fit: cover;">
+            <% if (stall.image) { %>
+              <img src="/images/stalls/<%= stall.image %>" class="card-img-top" alt="<%= stall.name %>" style="height: 200px; object-fit: cover;">
             <% } else { %>
               <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px">
                 <i class="bi bi-image text-muted" style="font-size: 3rem"></i>
               </div>
-            <% } %>
+            <% } %>            
             <div class="card-body">
               <h5 class="card-title"><%= stall.name %></h5>
               <p class="card-text">
@@ -89,6 +89,10 @@
                   </form>
                 </div>
               <% } %>
+              <!-- View More Button -->
+              <a href="/stalls/<%= stall.id %>" class="btn btn-sm btn-outline-secondary mt-2 w-100">
+                <i class="bi bi-eye"></i> View More
+              </a>
             </div>
             <div class="card-footer">
               <small class="text-muted">Open hours info...</small>
