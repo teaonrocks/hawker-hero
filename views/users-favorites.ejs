@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <%- include('partials/flash-messages') %>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1><i class="bi bi-people"></i> Other Users' Favorites</h1>
+      <a href="/favorites" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Back to My Favorites
+      </a>
+    </div>
+    <% if (favorites.length === 0) { %>
+      <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> No favorites from other users yet.
+      </div>
+    <% } else { %>
+      <div class="row">
+        <% favorites.forEach(fav => { %>
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title"><%= fav.stall_name || '-' %></h5>
+                <h6 class="card-subtitle mb-2 text-muted"><%= fav.food_name || '' %></h6>
+                <p class="card-text"><%= fav.notes || '' %></p>
+                <span class="badge bg-secondary">by <%= fav.username %></span>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <% if (totalPages > 1) { %>
+        <nav aria-label="Favorites pagination">
+          <ul class="pagination justify-content-center mt-4">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      <% } %>
+    <% } %>
+  </div>
+</body>
+</html>
