@@ -25,11 +25,30 @@
 								</a>
 								<% } %>
 						</div>
-						<!-- Filter Options -->
-						<form method="GET" action="/reviews">
+
+						<!-- Combined Filter Form -->
+						<form method="GET" action="/reviews" id="filterForm" class="mb-4">
+
+							<!-- Search input -->
+							<input type="text" name="search" class="form-control mb-3" placeholder="Search reviews..."
+								value="<%= search || '' %>" autocomplete="off" />
+
+							<!-- Price filters -->
+							<div class="row mb-3">
+								<div class="col-md-3">
+									<input type="number" name="min_price" value="<%= min_price || '' %>" step="1"
+										class="form-control" placeholder="Min Price" />
+								</div>
+								<div class="col-md-3">
+									<input type="number" name="max_price" value="<%= max_price || '' %>" step="1"
+										class="form-control" placeholder="Max Price" />
+								</div>
+							</div>
+
+							<!-- Other filters -->
 							<div class="row mb-4">
 								<div class="col-md-4">
-									<select class="form-select" name="rating" onchange="this.form.submit()">
+									<select class="form-select" name="rating">
 										<option value="">All Ratings</option>
 										<option value="5" <%=rating==5 ? 'selected' : '' %>>5 Stars</option>
 										<option value="4" <%=rating==4 ? 'selected' : '' %>>4 Stars</option>
@@ -39,7 +58,7 @@
 									</select>
 								</div>
 								<div class="col-md-4">
-									<select class="form-select" name="stall" onchange="this.form.submit()">
+									<select class="form-select" name="stall">
 										<option value="">All Stalls</option>
 										<% stalls.forEach(s=> { %>
 											<option value="<%= s.name %>" <%=stall===s.name ? 'selected' : '' %>><%=
@@ -48,9 +67,8 @@
 											<% }) %>
 									</select>
 								</div>
-
 								<div class="col-md-4">
-									<select class="form-select" name="sort" onchange="this.form.submit()">
+									<select class="form-select" name="sort">
 										<option value="recent" <%=sort==='recent' ? 'selected' : '' %>>Most Recent
 										</option>
 										<option value="oldest" <%=sort==='oldest' ? 'selected' : '' %>>Oldest First
@@ -61,14 +79,26 @@
 										</option>
 									</select>
 								</div>
+								<br><br>
+								<button type="button" class="btn btn-secondary ms-2"
+									onclick="window.location.href='/reviews'">Reset Filters</button>
 							</div>
-						</form>
 
+						</form>
 
 						<!-- Reviews List -->
 						<div class="row">
 							<div class="col-12">
-
+								<!-- Average Rating Display -->
+								<div class="mb-4">
+									<h5>Average Rating: <%= averageRating.toFixed(1) %> / 5</h5>
+									<div>
+										<% for(let i=0; i < 5; i++) { %>
+											<i
+												class="bi <%= i < Math.round(averageRating) ? 'bi-star-fill' : 'bi-star' %> text-warning"></i>
+											<% } %>
+									</div>
+								</div>
 								<% reviews.forEach(review=> { %>
 									<div class="card mb-3">
 										<div class="card-body">
@@ -98,12 +128,14 @@
 													</div>
 													<p class="card-text">"<%= review.comment %>"</p>
 												</div>
-												<div class="col-md-4 text-center">
-													<div class="bg-light rounded d-flex align-items-center justify-content-center"
-														style="height: 120px">
-														<i class="bi bi-image text-muted" style="font-size: 2rem"></i>
-													</div>
 
+												<div class="col-md-4 text-center">
+													<div class="bg-light rounded d-flex align-items-center justify-content-center overflow-hidden"
+														style="height: 120px">
+														<img src="<%= review.image_url %>"
+															alt="<%= review.stall_name %>" class="img-fluid"
+															style="max-height: 100%; object-fit: cover;">
+													</div>
 													<% if (user && user.role==="admin" ) { %>
 														<div class="row mt-2">
 															<div class="col-6 px-1">
@@ -122,8 +154,51 @@
 														</div>
 														<% } %>
 												</div>
+											</div>
 
+											<!-- Comments Section -->
+											<hr />
+											<h6 class="text-muted">Comments</h6>
+											<div class="mb-3 ps-3">
+												<% const comments=commentsByReview[review.id] || []; %>
+													<% comments.forEach(c=> { %>
+														<div class="mb-2">
+															<strong>
+																<%= c.username %>:
+															</strong>
+															<%= c.comment %> <br />
+																<small class="text-muted">
+																	<%= new Date(c.created_at).toLocaleString() %>
+																</small>
 
+																<% if (user && (user.id===c.user_id ||
+																	user.role==="admin" )) { %>
+																	<div>
+																		<a href="/comments/edit/<%= c.id %>"
+																			class="btn btn-sm btn-outline-primary">Edit</a>
+																		<a href="/comments/delete/<%= c.id %>"
+																			class="btn btn-sm btn-outline-danger"
+																			onclick="return confirm('Delete this comment?')">Delete</a>
+																	</div>
+																	<% } %>
+														</div>
+														<% }) %>
+
+															<% if (user) { %>
+																<form action="/reviews/<%= review.id %>/comments"
+																	method="POST" class="mt-2">
+																	<div class="input-group">
+																		<input type="text" name="comment"
+																			class="form-control"
+																			placeholder="Add a comment..." required>
+																		<button class="btn btn-outline-secondary"
+																			type="submit">Post</button>
+																	</div>
+																</form>
+																<% } else { %>
+																	<small><a href="/login">Log in</a> to
+																		comment.</small>
+																	<% } %>
 											</div>
 										</div>
 									</div>
@@ -147,12 +222,34 @@
 
 							</div>
 						</div>
-
 					</div>
 				</div>
 			</div>
 
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+			<script>
+				// Auto-submit the filter form when any filter changes or Enter key pressed on search
+				document.addEventListener('DOMContentLoaded', () => {
+					const filterForm = document.getElementById('filterForm');
+					const inputs = filterForm.querySelectorAll('input, select');
+
+					inputs.forEach(input => {
+						input.addEventListener('change', () => {
+							filterForm.submit();
+						});
+
+						if (input.name === 'search') {
+							input.addEventListener('keydown', (e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									filterForm.submit();
+								}
+							});
+						}
+					});
+				});
+			</script>
 </body>
 
 </html>

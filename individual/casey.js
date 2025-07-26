@@ -1,69 +1,127 @@
 app.get("/reviews", (req, res) => {
-	const { rating, stall, sort } = req.query;
+  const { rating, stall, sort, search, min_price, max_price } = req.query;
 
-	let sql = `
-		SELECT r.*, u.username, s.name AS stall_name, s.location
-		FROM reviews r
-		JOIN users u ON r.user_id = u.id
-		JOIN stalls s ON r.stall_id = s.id
-		WHERE 1 = 1
-	`;
+  console.log("Received filters:", { rating, stall, sort, search, min_price, max_price });
 
-	const params = [];
+  let sql = `
+	SELECT r.*, u.username, s.name AS stall_name, s.location, s.image_url
+	FROM reviews r
+	JOIN users u ON r.user_id = u.id
+	JOIN stalls s ON r.stall_id = s.id
+	WHERE 1 = 1
+  `;
 
-	if (rating) {
-		sql += " AND r.rating = ?";
-		params.push(parseInt(rating));
+  const params = [];
+
+  if (rating) {
+	sql += " AND r.rating = ?";
+	params.push(parseInt(rating));
+  }
+
+  if (stall) {
+	sql += " AND s.name = ?";
+	params.push(stall);
+  }
+
+  if (search) {
+	sql += ` AND s.name LIKE ?`;
+	params.push(`%${search}%`);
+  }
+
+  if (min_price || max_price) {
+	sql += ` AND EXISTS (
+	  SELECT 1 FROM food_items f
+	  WHERE f.stall_id = s.id`;
+
+	if (min_price) {
+	  sql += ` AND f.price >= ?`;
+	  params.push(parseFloat(min_price));
 	}
 
-	if (stall) {
-		sql += " AND s.name = ?";
-		params.push(stall);
+	if (max_price) {
+	  sql += ` AND f.price <= ?`;
+	  params.push(parseFloat(max_price));
 	}
 
-	if (sort === "recent") {
-		sql += " ORDER BY r.created_at DESC";
-	} else if (sort === "oldest") {
-		sql += " ORDER BY r.created_at ASC";
-	} else if (sort === "highest") {
-		sql += " ORDER BY r.rating DESC";
-	} else if (sort === "lowest") {
-		sql += " ORDER BY r.rating ASC";
-	} else {
-		sql += " ORDER BY r.created_at DESC";
-	}
+	sql += `)`;
+  }
 
-	const reviewQuery = new Promise((resolve, reject) => {
-		db.query(sql, params, (err, results) => {
-			if (err) return reject(err);
-			resolve(results);
-		});
+  if (sort === "recent") {
+	sql += " ORDER BY r.created_at DESC";
+  } else if (sort === "oldest") {
+	sql += " ORDER BY r.created_at ASC";
+  } else if (sort === "highest") {
+	sql += " ORDER BY r.rating DESC";
+  } else if (sort === "lowest") {
+	sql += " ORDER BY r.rating ASC";
+  } else {
+	sql += " ORDER BY r.created_at DESC";
+  }
+
+  const reviewQuery = new Promise((resolve, reject) => {
+	db.query(sql, params, (err, results) => {
+	  if (err) return reject(err);
+	  resolve(results);
 	});
+  });
 
-	const stallQuery = new Promise((resolve, reject) => {
-		db.query("SELECT DISTINCT name FROM stalls", (err, results) => {
-			if (err) return reject(err);
-			resolve(results);
-		});
+  const stallQuery = new Promise((resolve, reject) => {
+	db.query("SELECT DISTINCT name FROM stalls", (err, results) => {
+	  if (err) return reject(err);
+	  resolve(results);
 	});
+  });
 
-	Promise.all([reviewQuery, stallQuery])
-		.then(([reviews, stalls]) => {
-			res.render("reviews", {
-				title: "Reviews - Hawker Hero",
-				user: req.session.user,
-				messages: req.flash("success"),
-				reviews,
-				stalls, // pass stall names
-				rating,
-				stall,
-				sort
-			});
-		})
-		.catch(err => {
-			console.error(err);
-			res.status(500).send("Server error");
-		});
+  const commentQuery = new Promise((resolve, reject) => {
+	db.query(`
+	  SELECT c.*, u.username 
+	  FROM comments c
+	  JOIN users u ON c.user_id = u.id
+	`, (err, results) => {
+	  if (err) return reject(err);
+	  resolve(results);
+	});
+  });
+
+  Promise.all([reviewQuery, stallQuery, commentQuery])
+	.then(([reviews, stallOptions, allComments]) => {
+	  // ✅ Calculate average rating here
+	  let averageRating = 0;
+	  if (reviews.length > 0) {
+		const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+		averageRating = total / reviews.length;
+	  }
+
+	  // Group comments by review ID
+	  const commentsByReview = {};
+	  allComments.forEach(comment => {
+		if (!commentsByReview[comment.review_id]) {
+		  commentsByReview[comment.review_id] = [];
+		}
+		commentsByReview[comment.review_id].push(comment);
+	  });
+
+	  // ✅ Now averageRating is defined, safe to render
+	  res.render("reviews", {
+		title: "Reviews - Hawker Hero",
+		user: req.session.user,
+		messages: req.flash("success").concat(req.flash("error")),
+		reviews,
+		stalls: stallOptions,
+		rating,
+		stall,
+		sort,
+		search,
+		min_price,
+		max_price,
+		averageRating, // ← this is now correctly included
+		commentsByReview
+	  });
+	})
+	.catch(err => {
+	  console.error("Error loading reviews page:", err);
+	  res.status(500).send("Server error");
+	});
 });
 
 
@@ -255,6 +313,122 @@ app.get("/reviews/delete/:id", checkAuthenticated, (req, res) => {
 				req.flash("error", "Failed to delete review.");
 			} else {
 				req.flash("success", "Review deleted successfully.");
+			}
+			res.redirect("/reviews");
+		});
+	});
+});
+
+app.post("/reviews/:id/comments", (req, res) => {
+	if (!req.session.user) return res.redirect("/login");
+
+	const review_id = req.params.id;
+	const user_id = req.session.user.id;
+	const comment = req.body.comment;
+
+	const sql = "INSERT INTO comments (review_id, user_id, comment) VALUES (?, ?, ?)";
+	db.query(sql, [review_id, user_id, comment], (err) => {
+		if (err) {
+			console.error(err);
+			req.flash("error", "Failed to post comment.");
+		} else {
+			req.flash("success", "Comment posted.");
+		}
+		res.redirect("/reviews");
+	});
+});
+
+// Delete comment route
+app.get("/comments/delete/:id", checkAuthenticated, (req, res) => {
+	const commentId = req.params.id;
+	const user = req.session.user;
+
+	if (!user) {
+		req.flash("error", "Unauthorized");
+		return res.redirect("/reviews");
+	}
+
+	// Verify ownership or admin
+	const sql = "SELECT * FROM comments WHERE id = ?";
+	db.query(sql, [commentId], (err, results) => {
+		if (err || results.length === 0) {
+			req.flash("error", "Comment not found");
+			return res.redirect("/reviews");
+		}
+		const comment = results[0];
+		if (comment.user_id !== user.id && user.role !== "admin") {
+			req.flash("error", "You are not authorized to delete this comment");
+			return res.redirect("/reviews");
+		}
+
+		// Delete the comment
+		const deleteSql = "DELETE FROM comments WHERE id = ?";
+		db.query(deleteSql, [commentId], (err) => {
+			if (err) {
+				req.flash("error", "Failed to delete comment");
+			} else {
+				req.flash("success", "Comment deleted");
+			}
+			res.redirect("/reviews");
+		});
+	});
+});
+
+// GET form to edit comment
+app.get("/comments/edit/:id", checkAuthenticated, (req, res) => {
+	const commentId = req.params.id;
+	const user = req.session.user;
+
+	const sql = "SELECT * FROM comments WHERE id = ?";
+	db.query(sql, [commentId], (err, results) => {
+		if (err || results.length === 0) {
+			req.flash("error", "Comment not found");
+			return res.redirect("/reviews");
+		}
+		const comment = results[0];
+		if (comment.user_id !== user.id && user.role !== "admin") {
+			req.flash("error", "You are not authorized to edit this comment");
+			return res.redirect("/reviews");
+		}
+
+		res.render("editComment", {
+			title: "Edit Comment",
+			user,
+			formData: comment,
+			messages: req.flash("success").concat(req.flash("error"))
+		});
+	});
+});
+
+// POST update comment
+app.post("/comments/edit/:id", checkAuthenticated, (req, res) => {
+	const commentId = req.params.id;
+	const user = req.session.user;
+	const { comment } = req.body;
+
+	if (!comment || comment.trim() === "") {
+		req.flash("error", "Comment cannot be empty");
+		return res.redirect(`/comments/edit/${commentId}`);
+	}
+
+	const sql = "SELECT * FROM comments WHERE id = ?";
+	db.query(sql, [commentId], (err, results) => {
+		if (err || results.length === 0) {
+			req.flash("error", "Comment not found");
+			return res.redirect("/reviews");
+		}
+		const existingComment = results[0];
+		if (existingComment.user_id !== user.id && user.role !== "admin") {
+			req.flash("error", "You are not authorized to edit this comment");
+			return res.redirect("/reviews");
+		}
+
+		const updateSql = "UPDATE comments SET comment = ? WHERE id = ?";
+		db.query(updateSql, [comment, commentId], (err) => {
+			if (err) {
+				req.flash("error", "Failed to update comment");
+			} else {
+				req.flash("success", "Comment updated successfully");
 			}
 			res.redirect("/reviews");
 		});
