@@ -46,43 +46,58 @@ The application is structured into 6 core modules, each managing a specific aspe
 
 ```
 .
+├── config/                            # Configuration files
+│   └── database.js                    # Database connection configuration
 ├── database/                          # Database schema and seed data
-│   └── create_db_with_seed_data.sql
-├── individual/                      # Individual student modules or specific route handlers
+│   └── create_db_with_seed_data.sql   # SQL script for database creation and seeding
+├── individual/                        # Individual student modules or specific route handlers
 │   ├── archer.js
 │   ├── casey.js
 │   ├── lionel.js
 │   ├── nicole.js
 │   ├── syaz.js
 │   └── trevor.js
-├── node_modules/                    # Project dependencies
-├── public/                          # Static assets (CSS, client-side JS, images)
-│   ├── css/
-│   ├── images/                    # Directory for Multer uploads (e.g., stall/food images)
-│   └── js/
-├── views/                           # EJS templates for dynamic page rendering
-│   ├── admin/                     # Admin-specific views
-│   │   └── dashboard.ejs
-│   ├── auth/                      # Authentication-related views
-│   │   ├── login.ejs
-│   │   └── register.ejs
-│   ├── partials/                  # Reusable EJS partials (headers, footers, common UI elements)
-│   │   ├── flash-messages.ejs
-│   │   └── navbar.ejs
-│   ├── dashboard.ejs              # User dashboard view
-│   ├── favorites.ejs              # User favorites list view
-│   ├── food-items.ejs             # List of food items view
-│   ├── hawker-centers.ejs         # List of hawker centers view
-│   ├── index.ejs                  # Main homepage view
-│   ├── recommendations.ejs        # List of recommendations view
-│   ├── reviews.ejs                # List of reviews view
-│   └── stalls.ejs                 # List of hawker stalls view
-├── .env                             # Environment variables (IGNORED by Git)
-├── .env.example                     # Template for environment variables
-├── .gitignore                       # Specifies intentionally untracked files to ignore
-├── app.js                           # Main application entry point and server setup
-├── package-lock.json                # Dependency tree lock file
-└── package.json                     # Project metadata and script definitions
+├── middleware/                        # Express middleware
+│   ├── auth.js                        # Authentication middleware
+│   └── validation.js                  # Input validation middleware
+├── node_modules/                      # Project dependencies
+├── routes/                            # API routes for different modules
+│   ├── auth.js                        # Authentication related routes
+│   ├── favorites.js                   # Favorite items routes
+│   ├── food-items.js                  # Food items routes
+│   ├── general.js                     # General application routes
+│   ├── recommendations.js             # Recommendation routes
+│   ├── reviews.js                     # Review routes
+│   └── stalls.js                      # Hawker stall routes
+├── utils/                             # Utility functions
+│   └── helpers.js                     # Helper functions
+├── views/                             # EJS templates for dynamic page rendering
+│   ├── admin/                         # Admin-specific views (e.g., dashboard, management)
+│   ├── auth/                          # Authentication-related views (e.g., login, register)
+│   ├── partials/                      # Reusable EJS partials (headers, footers, common UI elements)
+│   ├── addfavorites.ejs               # View for adding favorites
+│   ├── addReviews.ejs                 # View for adding reviews
+│   ├── dashboard.ejs                  # User dashboard view
+│   ├── editComment.ejs                # View for editing comments
+│   ├── editfavorites.ejs              # View for editing favorites
+│   ├── editReviews.ejs                # View for editing reviews
+│   ├── favorites.ejs                  # User favorites list view
+│   ├── food-items.ejs                 # List of food items view
+│   ├── hawker-centers.ejs             # List of hawker centers view
+│   ├── index.ejs                      # Main homepage view
+│   ├── recommendations.ejs            # List of recommendations view
+│   ├── reviews.ejs                    # List of reviews view
+│   ├── stall-detail.ejs               # Detailed view for a single stall
+│   ├── stalls-edit.ejs                # View for editing hawker stalls
+│   ├── stalls-new.ejs                 # View for adding new hawker stalls
+│   ├── stalls.ejs                     # List of hawker stalls view
+│   └── users-favorites.ejs            # View displaying users' favorites
+├── .env                               # Environment variables (IGNORED by Git)
+├── .env.example                       # Template for environment variables
+├── .gitignore                         # Specifies intentionally untracked files to ignore
+├── app.js                             # Main application entry point and server setup
+├── package-lock.json                  # Dependency tree lock file
+└── package.json                       # Project metadata and script definitions
 ```
 
 The `individual/` folder likely contains the specific implementations for the 6 modules, with each `.js` file potentially handled by a different student/developer as part of the team.
