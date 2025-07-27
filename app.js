@@ -13,6 +13,7 @@ const stallsRoutes = require("./routes/stalls");
 const reviewsRoutes = require("./routes/reviews");
 const recommendationsRoutes = require("./routes/recommendations");
 const generalRoutes = require("./routes/general");
+const foodItemsRoutes = require("./routes/food-items");
 
 // Middleware
 app.use(express.urlencoded({ extended: false }));
@@ -39,6 +40,7 @@ app.use("/", stallsRoutes);
 app.use("/", reviewsRoutes);
 app.use("/", recommendationsRoutes);
 app.use("/", generalRoutes);
+app.use("/", foodItemsRoutes);
 
 app.listen(process.env.PORT || 3000, () => {
 	console.log(
