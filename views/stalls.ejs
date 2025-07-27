@@ -1,171 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title><%= title %></title>
-		<link
-			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-			rel="stylesheet"
-		/>
-		<link
-			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-			rel="stylesheet"
-		/>
-	</head>
-	<body>
-		<%- include('partials/navbar') %> 
-		<%- include('partials/flash-messages') %>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <%- include('partials/flash-messages') %>
 
-		<div class="container mt-4">
-			<div class="row">
-				<div class="col-12">
-					<h1 class="mb-4"><i class="bi bi-shop"></i> Hawker Stalls</h1>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1><i class="bi bi-shop"></i> Hawker Stalls</h1>
+      <% if (user && user.role === 'admin') { %>
+        <a href="/stalls/new" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Stall</a>
+      <% } %>
+    </div>
 
-					<!-- Search and Filter -->
-					<div class="row mb-4">
-						<div class="col-md-6">
-							<div class="input-group">
-								<input
-									type="text"
-									class="form-control"
-									placeholder="Search stalls..."
-								/>
-								<button class="btn btn-primary" type="button">
-									<i class="bi bi-search"></i>
-								</button>
-							</div>
-						</div>
-						<div class="col-md-3">
-							<select class="form-select">
-								<option>All Cuisines</option>
-								<option>Chinese</option>
-								<option>Malay</option>
-								<option>Indian</option>
-								<option>Western</option>
-							</select>
-						</div>
-						<div class="col-md-3">
-							<select class="form-select">
-								<option>All Centers</option>
-								<option>Maxwell Food Centre</option>
-								<option>Newton Food Centre</option>
-								<option>Lau Pa Sat</option>
-							</select>
-						</div>
-					</div>
+    <!-- Search Form -->
+    <form method="GET" action="/stalls" class="row mb-4">
+      <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search by name..." value="<%= query?.search || '' %>" />
+      </div>
+      <div class="col-md-3">
+        <select name="cuisine" class="form-select">
+			<option value="">All Cuisines</option>
+			<% if (Array.isArray(cuisines) && cuisines.length > 0) { %>
+			  <% cuisines.forEach(c => { %>
+          <option value="<%= c %>" <%= query?.cuisine === c ? 'selected' : '' %>><%= c %></option>
+			  <% }) %>
+			<% } else { %>
+			  <option disabled>No cuisines found</option>
+			<% } %>
+		  </select>		  
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="location" class="form-control" placeholder="Location..." value="<%= query?.location || '' %>" />
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">
+          <i class="bi bi-search"></i> Search
+        </button>
+      </div>
+    </form>
 
-					<!-- Stalls Grid -->
-					<div class="row">
-						<!-- Sample Stall Card 1 -->
-						<div class="col-md-4 mb-4">
-							<div class="card h-100">
-								<div
-									class="card-img-top bg-light d-flex align-items-center justify-content-center"
-									style="height: 200px"
-								>
-									<i class="bi bi-image text-muted" style="font-size: 3rem"></i>
-								</div>
-								<div class="card-body">
-									<h5 class="card-title">Ah Liang Chicken Rice</h5>
-									<p class="card-text">
-										<small class="text-muted">
-											<i class="bi bi-geo-alt"></i> Maxwell Food Centre </small
-										><br />
-										<span class="badge bg-primary">Chinese</span>
-									</p>
-									<p class="card-text">
-										Famous for tender chicken and fragrant rice.
-									</p>
-									<div
-										class="d-flex justify-content-between align-items-center"
-									>
-										<div class="text-warning">
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star"></i>
-											<small class="text-muted ms-1">(24 reviews)</small>
-										</div>
-										<% if (user) { %>
-										<form method="POST" action="/favorites/add" class="d-inline favorite-form">
-										  <input type="hidden" name="stall_id" value="1">
-										  <input type="hidden" name="redirect_to" value="/stalls">
-										  <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Add this stall to your favorites?');">
-										    <i class="bi bi-heart"></i>
-										  </button>
-										</form>
-										<% } %>
-									</div>
-								</div>
-								<div class="card-footer">
-									<small class="text-muted">Open: 8:00 AM - 3:00 PM</small>
-								</div>
-							</div>
-						</div>
+    <!-- Stalls Grid -->
+    <div class="row">
+      <% stalls.forEach(stall => { %>
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <% if (stall.image) { %>
+              <img src="/images/stalls/<%= stall.image %>" class="card-img-top" alt="<%= stall.name %>" style="height: 200px; object-fit: cover;">
+            <% } else { %>
+              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px">
+                <i class="bi bi-image text-muted" style="font-size: 3rem"></i>
+              </div>
+            <% } %>            
+            <div class="card-body">
+              <h5 class="card-title"><%= stall.name %></h5>
+              <p class="card-text">
+                <small class="text-muted">
+                  <i class="bi bi-geo-alt"></i> <%= stall.location %>
+                </small><br />
+                <span class="badge bg-primary"><%= stall.cuisine %></span>
+              </p>
+              <% if (stall.rating) { %>
+                <div class="text-warning mb-2">
+                  <% for (let i = 0; i < 5; i++) { %>
+                    <i class="bi <%= i < stall.rating ? 'bi-star-fill' : 'bi-star' %>"></i>
+                  <% } %>
+                  <small class="text-muted ms-1">(<%= stall.review_count || 0 %> reviews)</small>
+                </div>
+              <% } %>
+              <% if (user) { %>
+                <form action="/favourites/<%= stall.id %>" method="POST">
+                  <button class="btn btn-sm <%= favourites && favourites.includes(stall.id) ? 'btn-danger' : 'btn-outline-danger' %>">
+                    <i class="bi bi-heart"></i>
+                  </button>
+                </form>
+              <% } %>
+              <% if (user && user.role === 'admin') { %>
+                <div class="d-flex justify-content-between mt-2">
+                  <a href="/stalls/<%= stall.id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form method="POST" action="/stalls/<%= stall.id %>?_method=DELETE" onsubmit="return confirm('Delete this stall?')">
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </div>
+              <% } %>
+              <!-- View More Button -->
+              <a href="/stalls/<%= stall.id %>" class="btn btn-sm btn-outline-secondary mt-2 w-100">
+                <i class="bi bi-eye"></i> View More
+              </a>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">Open hours info...</small>
+            </div>
+          </div>
+        </div>
+      <% }) %>
 
-						<!-- Sample Stall Card 2 -->
-						<div class="col-md-4 mb-4">
-							<div class="card h-100">
-								<div
-									class="card-img-top bg-light d-flex align-items-center justify-content-center"
-									style="height: 200px"
-								>
-									<i class="bi bi-image text-muted" style="font-size: 3rem"></i>
-								</div>
-								<div class="card-body">
-									<h5 class="card-title">Uncle Lim Laksa</h5>
-									<p class="card-text">
-										<small class="text-muted">
-											<i class="bi bi-geo-alt"></i> Newton Food Centre </small
-										><br />
-										<span class="badge bg-success">Peranakan</span>
-									</p>
-									<p class="card-text">
-										Authentic laksa with rich coconut broth.
-									</p>
-									<div
-										class="d-flex justify-content-between align-items-center"
-									>
-										<div class="text-warning">
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<i class="bi bi-star-fill"></i>
-											<small class="text-muted ms-1">(18 reviews)</small>
-										</div>
-										<% if (user) { %>
-										<form method="POST" action="/favorites/add" class="d-inline favorite-form">
-										  <input type="hidden" name="stall_id" value="2">
-										  <input type="hidden" name="redirect_to" value="/stalls">
-										  <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Add this stall to your favorites?');">
-										    <i class="bi bi-heart"></i>
-										  </button>
-										</form>
-										<% } %>
-									</div>
-								</div>
-								<div class="card-footer">
-									<small class="text-muted">Open: 11:00 AM - 9:00 PM</small>
-								</div>
-							</div>
-						</div>
+      <% if (stalls.length === 0) { %>
+        <div class="col-12 text-center py-5">
+          <i class="bi bi-shop text-muted" style="font-size: 4rem"></i>
+          <h4 class="mt-3 text-muted">No stalls found</h4>
+          <p class="text-muted">Try adjusting your filters or check back later.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
 
-						<!-- Empty state when no stalls -->
-						<% if (stalls.length === 0) { %>
-						<div class="col-12 text-center py-5">
-							<i class="bi bi-shop text-muted" style="font-size: 4rem"></i>
-							<h4 class="mt-3 text-muted">No stalls found</h4>
-							<p class="text-muted">Check back later for new stalls!</p>
-						</div>
-						<% } %>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-	</body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
