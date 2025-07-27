@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Favorite</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    .stall-card { cursor: pointer; transition: box-shadow 0.2s; }
+    .stall-card.selected, .stall-card:hover { box-shadow: 0 0 0 2px #0d6efd; border-color: #0d6efd; }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <div class="container mt-4">
+    <h2><i class="bi bi-heart-fill text-danger"></i> Add Favorite</h2>
+    <form action="/favorites/add" method="POST" id="addFavoriteForm">
+      <input type="hidden" name="stall_id" id="stall_id" required>
+      <div class="mb-4">
+        <label class="form-label"><strong>Pick a Stall:</strong></label>
+        <div class="row">
+          <% stalls.forEach(stall => { %>
+            <div class="col-md-4 mb-3">
+              <div class="card stall-card" data-stall-id="<%= stall.id %>">
+                <div class="card-body">
+                  <h5 class="card-title"><%= stall.name %></h5>
+                  <% if (stall.center_name) { %>
+                    <p class="card-text text-muted mb-0"><i class="bi bi-geo-alt"></i> <%= stall.center_name %></p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+      <div class="mb-3" id="foodItemSection" style="display:none;">
+        <label for="food_id" class="form-label">Food Item (optional)</label>
+        <select class="form-select" id="food_id" name="food_id">
+          <option value="">-- Select a food item --</option>
+          <% foodItems.forEach(food => { %>
+            <option value="<%= food.id %>" data-stall-id="<%= food.stall_id %>"><%= food.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="notes" class="form-label">Notes (optional)</label>
+        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add to Favorites</button>
+      <a href="/favorites" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+  <script>
+    // Stall card selection logic
+    const stallCards = document.querySelectorAll('.stall-card');
+    const stallIdInput = document.getElementById('stall_id');
+    const foodItemSection = document.getElementById('foodItemSection');
+    const foodSelect = document.getElementById('food_id');
+    stallCards.forEach(card => {
+      card.addEventListener('click', function() {
+        stallCards.forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        const selectedStallId = this.getAttribute('data-stall-id');
+        stallIdInput.value = selectedStallId;
+        // Show only food items for this stall
+        foodItemSection.style.display = 'block';
+        Array.from(foodSelect.options).forEach(opt => {
+          if (!opt.value) {
+            opt.style.display = '';
+          } else {
+            opt.style.display = (opt.getAttribute('data-stall-id') === selectedStallId) ? '' : 'none';
+          }
+        });
+        foodSelect.value = '';
+      });
+    });
+    // Prevent form submit if no stall selected
+    document.getElementById('addFavoriteForm').addEventListener('submit', function(e) {
+      if (!stallIdInput.value) {
+        alert('Please select a stall.');
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

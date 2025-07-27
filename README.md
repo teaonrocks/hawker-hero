@@ -46,24 +46,43 @@ The application is structured into 6 core modules, each managing a specific aspe
 
 ```
 .
-├── individual/ # Individual student modules or specific route handlers
-│ ├── archer.js
-│ ├── casey.js
-│ ├── lionel.js
-│ ├── nicole.js
-│ ├── syaz.js
-│ └── trevor.js
-├── node_modules/ # Project dependencies
-├── public/ # Static assets (CSS, client-side JS, images)
-│ ├── css/
-│ └── js/
-├── views/ # EJS templates for dynamic page rendering
-│ └── index.ejs
-├── .env # Environment variables (IGNORED by Git)
-├── .env.example # Template for environment variables
-├── app.js # Main application entry point and server setup
-├── package-lock.json # Dependency tree lock file
-└── package.json # Project metadata and script definitions
+├── database/                          # Database schema and seed data
+│   └── create_db_with_seed_data.sql
+├── individual/                      # Individual student modules or specific route handlers
+│   ├── archer.js
+│   ├── casey.js
+│   ├── lionel.js
+│   ├── nicole.js
+│   ├── syaz.js
+│   └── trevor.js
+├── node_modules/                    # Project dependencies
+├── public/                          # Static assets (CSS, client-side JS, images)
+│   ├── css/
+│   ├── images/                    # Directory for Multer uploads (e.g., stall/food images)
+│   └── js/
+├── views/                           # EJS templates for dynamic page rendering
+│   ├── admin/                     # Admin-specific views
+│   │   └── dashboard.ejs
+│   ├── auth/                      # Authentication-related views
+│   │   ├── login.ejs
+│   │   └── register.ejs
+│   ├── partials/                  # Reusable EJS partials (headers, footers, common UI elements)
+│   │   ├── flash-messages.ejs
+│   │   └── navbar.ejs
+│   ├── dashboard.ejs              # User dashboard view
+│   ├── favorites.ejs              # User favorites list view
+│   ├── food-items.ejs             # List of food items view
+│   ├── hawker-centers.ejs         # List of hawker centers view
+│   ├── index.ejs                  # Main homepage view
+│   ├── recommendations.ejs        # List of recommendations view
+│   ├── reviews.ejs                # List of reviews view
+│   └── stalls.ejs                 # List of hawker stalls view
+├── .env                             # Environment variables (IGNORED by Git)
+├── .env.example                     # Template for environment variables
+├── .gitignore                       # Specifies intentionally untracked files to ignore
+├── app.js                           # Main application entry point and server setup
+├── package-lock.json                # Dependency tree lock file
+└── package.json                     # Project metadata and script definitions
 ```
 
 The `individual/` folder likely contains the specific implementations for the 6 modules, with each `.js` file potentially handled by a different student/developer as part of the team.
@@ -107,17 +126,17 @@ This project uses environment variables to manage sensitive information and conf
     ```
     # .env
     PORT=3000
-    HOST=localhost
-    USERNAME=root
-    PASSWORD=password
-    DATABASE=database
+    DB_HOST=localhost
+    DB_USERNAME=root
+    DB_PASSWORD=password
+    DB_NAME=database
     ```
 
     - `PORT`: The port your Express server will listen on.
-    - `HOST`: Your MySQL database host (e.g., `localhost`).
-    - `USERNAME`: Your MySQL database username.
-    - `PASSWORD`: Your MySQL database password.
-    - `DATABASE`: The name of your MySQL database.
+    - `DB_HOST`: Your MySQL database host (e.g., `localhost`).
+    - `DB_USERNAME`: Your MySQL database username.
+    - `DB_PASSWORD`: Your MySQL database password.
+    - `DB_NAME`: The name of your MySQL database.
 
     **_SECURITY NOTE_**: **DO NOT** commit your `.env` file to version control. It is already included in `.gitignore` by default.
 
