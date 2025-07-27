@@ -1,0 +1,31 @@
+const express = require("express");
+const router = express.Router();
+
+router.get("/stalls", (req, res) => {
+	res.render("stalls", {
+		title: "Stalls - Hawker Hero",
+		user: req.session.user,
+		messages: req.flash("success"),
+		stalls: [],
+	});
+});
+
+router.get("/hawker-centers", (req, res) => {
+	res.render("hawker-centers", {
+		title: "Hawker Centers - Hawker Hero",
+		user: req.session.user,
+		messages: req.flash("success"),
+		centers: [],
+	});
+});
+
+router.get("/food-items", (req, res) => {
+	res.render("food-items", {
+		title: "Food Items - Hawker Hero",
+		user: req.session.user,
+		messages: req.flash("success"),
+		foodItems: [],
+	});
+});
+
+module.exports = router;
