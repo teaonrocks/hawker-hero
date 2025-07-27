@@ -7,25 +7,25 @@ require("dotenv").config();
 
 const app = express();
 
-// Setup for file uploads
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, "public/images/stalls");
+		cb(null, "public/images");
 	},
 	filename: (req, file, cb) => {
-		const uniqueName = Date.now() + "-" + file.originalname;
-		cb(null, uniqueName);
+		cb(null, file.originalname);
 	},
 });
-const upload = multer({ storage });
 
-// MySQL connection
+const upload = multer({ storage: storage });
+
+// Database connection
 const db = mysql.createConnection({
 	host: process.env.DB_HOST,
 	user: process.env.DB_USERNAME,
 	password: process.env.DB_PASSWORD,
 	database: process.env.DB_NAME,
 });
+
 db.connect((err) => {
 	if (err) {
 		console.error("Error connection to MySQL:", err);
@@ -63,9 +63,10 @@ app.use(
 		secret: process.env.SESSION_SECRET || "hawker-hero-secret",
 		resave: false,
 		saveUninitialized: true,
-		cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+		cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }, // 7 days
 	})
 );
+
 app.use(flash());
 app.set("view engine", "ejs");
 
@@ -84,34 +85,47 @@ const queryDB = (sql, params = []) => {
 
 // Middleware to check if user is logged in
 const checkAuthenticated = (req, res, next) => {
-	if (req.session.user) return next();
-	req.flash("error", "Please log in to view this resource.");
-	res.redirect("/login");
+	if (req.session.user) {
+		return next();
+	} else {
+		req.flash("error", "Please log in to view this resource.");
+		return res.redirect("/login");
+	}
 };
 
+// Middleware to check if user is admin
 const checkAdmin = (req, res, next) => {
-	if (req.session.user && req.session.user.role === "admin") return next();
-	req.flash("error", "You do not have permission to view this resource.");
-	res.redirect("/");
+	if (req.session.user && req.session.user.role === "admin") {
+		return next();
+	} else {
+		req.flash("error", "You do not have permission to view this resource.");
+		return res.redirect("/");
+	}
 };
 
+// Validation middleware for registration
 const validateRegistration = (req, res, next) => {
 	const { username, email, password } = req.body;
+
 	if (!username || !email || !password) {
 		req.flash("error", "All fields are required.");
 		req.flash("formData", req.body);
 		return res.redirect("/register");
 	}
+
 	if (password.length < 6) {
-		req.flash("error", "Password must be at least 6 characters.");
+		req.flash("error", "Password must be at least 6 characters long.");
 		req.flash("formData", req.body);
 		return res.redirect("/register");
 	}
-	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-		req.flash("error", "Enter a valid email.");
+
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	if (!emailRegex.test(email)) {
+		req.flash("error", "Please enter a valid email address.");
 		req.flash("formData", req.body);
 		return res.redirect("/register");
 	}
+
 	next();
 };
 
@@ -134,24 +148,38 @@ app.get("/register", (req, res) => {
 
 app.post("/register", validateRegistration, (req, res) => {
 	const { username, email, password, role } = req.body;
+
 	const checkUserSql = "SELECT * FROM users WHERE email = ? OR username = ?";
 	db.query(checkUserSql, [email, username], (err, results) => {
-		if (err || results.length > 0) {
-			req.flash("error", results.length ? "User exists." : "DB error.");
+		if (err) {
+			console.error("Database error:", err);
+			req.flash("error", "Registration failed. Please try again.");
+			return res.redirect("/register");
+		}
+
+		if (results.length > 0) {
+			req.flash("error", "Username or email already exists.");
 			req.flash("formData", req.body);
 			return res.redirect("/register");
 		}
-		const userRole = role || "user";
+
 		const insertSql =
 			"INSERT INTO users (username, email, password_hash, role, created_at) VALUES (?, ?, SHA1(?), ?, NOW())";
-		db.query(insertSql, [username, email, password, userRole], (err) => {
-			if (err) {
-				req.flash("error", "Registration failed.");
-				return res.redirect("/register");
+		const userRole = role || "user";
+
+		db.query(
+			insertSql,
+			[username, email, password, userRole],
+			(err, result) => {
+				if (err) {
+					console.error("Database error:", err);
+					req.flash("error", "Registration failed. Please try again.");
+					return res.redirect("/register");
+				}
+				req.flash("success", "Registration successful! Please log in.");
+				res.redirect("/login");
 			}
-			req.flash("success", "Registered! Please log in.");
-			res.redirect("/login");
-		});
+		);
 	});
 });
 
@@ -165,19 +193,28 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
 	const { email, password } = req.body;
+
 	if (!email || !password) {
-		req.flash("error", "Email and password required.");
+		req.flash("error", "Email and password are required.");
 		return res.redirect("/login");
 	}
+
 	const sql = "SELECT * FROM users WHERE email = ? AND password_hash = SHA1(?)";
 	db.query(sql, [email, password], (err, results) => {
-		if (err || results.length === 0) {
-			req.flash("error", "Invalid login.");
+		if (err) {
+			console.error("Database error:", err);
+			req.flash("error", "Login failed. Please try again.");
 			return res.redirect("/login");
 		}
-		req.session.user = results[0];
-		req.flash("success", "Login successful!");
-		res.redirect("/dashboard");
+
+		if (results.length > 0) {
+			req.session.user = results[0];
+			req.flash("success", "Login successful!");
+			return res.redirect("/dashboard");
+		} else {
+			req.flash("error", "Invalid email or password.");
+			return res.redirect("/login");
+		}
 	});
 });
 
@@ -198,7 +235,6 @@ app.get("/admin", checkAuthenticated, checkAdmin, (req, res) => {
 		stats: { users: 0, hawker_centers: 0, stalls: 0, reviews: 0 },
 	});
 });
-
 
 // Admin: Manage Favorites
 app.get("/admin/manage-favorites", checkAuthenticated, checkAdmin, async (req, res) => {
@@ -293,7 +329,6 @@ app.get("/favorites", checkAuthenticated, async (req, res) => {
         LEFT JOIN food_items fd ON f.food_id = fd.id
         WHERE f.user_id = ? AND (s.name LIKE ? OR fd.name LIKE ?)
       `;
-
 
       dataQuery = `
         SELECT f.*, s.name AS stall_name, fd.name AS food_name
@@ -522,149 +557,15 @@ app.get("/favorites/delete/:id", checkAuthenticated, async (req, res) => {
   res.redirect("/favorites");
 });
 
-
-				res.redirect(redirectTo);
-			});
-		});
-	}
-);
-
-// Hawker Stalls
 app.get("/stalls", (req, res) => {
-	const { search, cuisine, location } = req.query;
-
-	const cuisineQuery = "SELECT DISTINCT cuisine FROM stalls";
-	db.query(cuisineQuery, (err, cuisineResults) => {
-		if (err) throw err;
-		const cuisineList = cuisineResults; // ✅ just use the full array
-
-		let sql = "SELECT * FROM stalls WHERE 1=1";
-		const params = [];
-
-		if (search) {
-			sql += " AND name LIKE ?";
-			params.push(`%${search}%`);
-		}
-
-		if (cuisine) {
-			sql += " AND cuisine = ?";
-			params.push(cuisine);
-		}
-
-		if (location) {
-			sql += " AND location LIKE ?";
-			params.push(`%${location}%`);
-		}
-
-		db.query(sql, params, (err, stalls) => {
-			if (err) throw err;
-			res.render("stalls", {
-				title: "Stalls - Hawker Hero",
-				user: req.session.user,
-				messages: req.flash("success"),
-				errors: req.flash("error"),
-				stalls,
-				query: req.query,
-				cuisines: cuisineList,
-				favourites: req.session.favourites || [],
-			});
-		});
-	});
-});
-
-app.get("/stalls/new", checkAuthenticated, checkAdmin, (req, res) => {
-	res.render("stalls-new", {
-		title: "Add Stall",
+	res.render("stalls", {
+		title: "Stalls - Hawker Hero",
 		user: req.session.user,
+		messages: req.flash("success"),
+		stalls: [],
 	});
 });
 
-app.post(
-	"/stalls",
-	checkAuthenticated,
-	checkAdmin,
-	upload.single("image"),
-	(req, res) => {
-		const { name, location, cuisine } = req.body;
-		const image = req.file ? req.file.filename : null;
-
-		db.query(
-			"INSERT INTO stalls (name, location, cuisine, image) VALUES (?, ?, ?, ?)",
-			[name, location, cuisine, image],
-			(err) => {
-				if (err) throw err;
-				res.redirect("/stalls");
-			}
-		);
-	}
-);
-
-app.get("/stalls/:id", async (req, res) => {
-	const { id } = req.params;
-
-	try {
-		const stallSql = "SELECT * FROM stalls WHERE id = ?";
-		const [stall] = await queryDB(stallSql, [id]);
-
-		if (!stall) {
-			req.flash("error", "Stall not found.");
-			return res.redirect("/stalls");
-		}
-
-		// Optional: fetch food items for this stall
-		const foodItemsSql = "SELECT * FROM food_items WHERE stall_id = ?";
-		const foodItems = await queryDB(foodItemsSql, [id]);
-
-		res.render("stall-detail", {
-			title: stall.name + " - Hawker Hero",
-			user: req.session.user,
-			stall,
-			foodItems,
-			messages: req.flash("success"),
-			errors: req.flash("error"),
-		});
-	} catch (err) {
-		console.error("Error loading stall detail:", err);
-		req.flash("error", "Error loading stall page.");
-		res.redirect("/stalls");
-	}
-});
-
-app.get("/stalls/:id/edit", checkAuthenticated, checkAdmin, (req, res) => {
-	const { id } = req.params;
-	db.query("SELECT * FROM stalls WHERE id = ?", [id], (err, results) => {
-		if (err) throw err;
-		res.render("stalls-edit", { stall: results[0], title: "Edit Stall" });
-	});
-});
-
-app.put("/stalls/:id", checkAuthenticated, checkAdmin, (req, res) => {
-	const { id } = req.params;
-	const { name, location, cuisine } = req.body;
-	db.query(
-		"UPDATE stalls SET name = ?, location = ?, cuisine = ? WHERE id = ?",
-		[name, location, cuisine, id],
-		(err) => {
-			if (err) throw err;
-			res.redirect("/stalls");
-		}
-	);
-});
-
-app.delete("/stalls/:id", async (req, res) => {
-	const { id } = req.params;
-	try {
-		await queryDB("DELETE FROM stalls WHERE id = ?", [id]);
-		req.flash("success", "Stall deleted successfully.");
-		res.redirect("/stalls");
-	} catch (err) {
-		console.error("Error deleting stall:", err);
-		req.flash("error", "Failed to delete stall.");
-		res.redirect("/stalls");
-	}
-});
-
-// Other modules
 app.get("/hawker-centers", (req, res) => {
 	res.render("hawker-centers", {
 		title: "Hawker Centers - Hawker Hero",
@@ -673,6 +574,7 @@ app.get("/hawker-centers", (req, res) => {
 		centers: [],
 	});
 });
+
 app.get("/reviews", (req, res) => {
   const { rating, stall, sort, search, min_price, max_price } = req.query;
 
@@ -1075,7 +977,6 @@ app.get("/comments/edit/:id", checkAuthenticated, (req, res) => {
 	});
 });
 
-
 // POST update comment
 app.post("/comments/edit/:id", checkAuthenticated, (req, res) => {
 	const commentId = req.params.id;
@@ -1110,7 +1011,6 @@ app.post("/comments/edit/:id", checkAuthenticated, (req, res) => {
 		});
 	});
 });
-
 
 
 
@@ -1325,5 +1225,7 @@ app.get("/logout", (req, res) => {
 });
 
 app.listen(process.env.PORT || 3000, () => {
-	console.log(`Server running at http://localhost:${process.env.PORT || 3000}`);
+	console.log(
+		`Server is running on http://localhost:${process.env.PORT || 3000}`
+	);
 });
