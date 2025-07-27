@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 	},
 	filename: (req, file, cb) => {
 		const uniqueName = Date.now() + "-" + file.originalname;
-    	cb(null, uniqueName);
+		cb(null, uniqueName);
 	},
 });
 const upload = multer({ storage });
@@ -201,11 +201,11 @@ app.get("/admin", checkAuthenticated, checkAdmin, (req, res) => {
 
 // List favorites with role-based access control
 app.get("/favorites", checkAuthenticated, (req, res) => {
-    const { search, view, user: searchUser } = req.query;
-    const { id: userId, isAdmin } = req.session.user;
-    const showAll = view === 'all' && isAdmin;
-    
-    let sql = `
+	const { search, view, user: searchUser } = req.query;
+	const { id: userId, isAdmin } = req.session.user;
+	const showAll = view === "all" && isAdmin;
+
+	let sql = `
         SELECT 
             f.id, f.notes, f.created_at, f.user_id,
             u.username,
@@ -218,341 +218,375 @@ app.get("/favorites", checkAuthenticated, (req, res) => {
         WHERE 1=1
     `;
 
-    const params = [];
-    
-    // Regular users can only see their own favorites
-    if (!isAdmin) {
-        sql += " AND f.user_id = ?";
-        params.push(userId);
-    } 
-    // If admin is viewing a specific user's favorites
-    else if (searchUser) {
-        sql += " AND f.user_id = ?";
-        params.push(searchUser);
-    }
-    
-    // Search functionality
-    if (search) {
-        sql += ` AND (
+	const params = [];
+
+	// Regular users can only see their own favorites
+	if (!isAdmin) {
+		sql += " AND f.user_id = ?";
+		params.push(userId);
+	}
+	// If admin is viewing a specific user's favorites
+	else if (searchUser) {
+		sql += " AND f.user_id = ?";
+		params.push(searchUser);
+	}
+
+	// Search functionality
+	if (search) {
+		sql += ` AND (
             s.name LIKE ? OR 
             fd.name LIKE ? OR 
             u.username LIKE ? OR 
             f.notes LIKE ?
         )`;
-        const searchTerm = `%${search}%`;
-        params.push(searchTerm, searchTerm, searchTerm, searchTerm);
-    }
-    
-    sql += " ORDER BY f.created_at DESC";
+		const searchTerm = `%${search}%`;
+		params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+	}
 
-    db.query(sql, params, (err, favorites) => {
-        if (err) {
-            console.error("Error fetching favorites:", err);
-            return res.status(500).render("error", {
-                title: "Error",
-                message: "Failed to load favorites",
-                error: { status: 500 }
-            });
-        }
+	sql += " ORDER BY f.created_at DESC";
 
-        // If admin, get list of users with favorites for the user filter
-        let users = [];
-        if (isAdmin) {
-            db.query(`
+	db.query(sql, params, (err, favorites) => {
+		if (err) {
+			console.error("Error fetching favorites:", err);
+			return res.status(500).render("error", {
+				title: "Error",
+				message: "Failed to load favorites",
+				error: { status: 500 },
+			});
+		}
+
+		// If admin, get list of users with favorites for the user filter
+		let users = [];
+		if (isAdmin) {
+			db.query(
+				`
                 SELECT DISTINCT u.id, u.username 
                 FROM favorites f 
                 JOIN users u ON f.user_id = u.id 
                 ORDER BY u.username
-            `, (err, userResults) => {
-                if (!err) users = userResults;
-                renderFavorites();
-            });
-        } else {
-            renderFavorites();
-        }
+            `,
+				(err, userResults) => {
+					if (!err) users = userResults;
+					renderFavorites();
+				}
+			);
+		} else {
+			renderFavorites();
+		}
 
-        function renderFavorites() {
-            res.render("favorites", {
-                title: isAdmin ? (searchUser ? `Favorites for User #${searchUser}` : "All Favorites") : "My Favorites",
-                user: req.session.user,
-                favorites,
-                users,
-                search,
-                searchUser,
-                showAll: isAdmin && !searchUser,
-                isAdmin,
-                messages: req.flash()
-            });
-        }
-    });
+		function renderFavorites() {
+			res.render("favorites", {
+				title: isAdmin
+					? searchUser
+						? `Favorites for User #${searchUser}`
+						: "All Favorites"
+					: "My Favorites",
+				user: req.session.user,
+				favorites,
+				users,
+				search,
+				searchUser,
+				showAll: isAdmin && !searchUser,
+				isAdmin,
+				messages: req.flash(),
+			});
+		}
+	});
 });
 
 // Add favorite (POST)
 app.post("/favorites/add", checkAuthenticated, (req, res) => {
-    console.log("Add favorite request body:", req.body); // Debug log
-    
-    const { stall_id, food_id, notes, redirect_to } = req.body;
-    const user_id = req.session.user.id;
-    const redirectPath = redirect_to || '/stalls';
+	console.log("Add favorite request body:", req.body); // Debug log
 
-    // Validate that at least one ID is provided
-    if ((!stall_id || stall_id === '') && (!food_id || food_id === '')) {
-        console.error("Validation failed: No stall_id or food_id provided");
-        req.flash("error", "Please select either a stall or a food item to favorite");
-        return res.redirect(redirectPath);
-    }
+	const { stall_id, food_id, notes, redirect_to } = req.body;
+	const user_id = req.session.user.id;
+	const redirectPath = redirect_to || "/stalls";
 
-    // Check if already favorited
-    const checkSql = `
+	// Validate that at least one ID is provided
+	if ((!stall_id || stall_id === "") && (!food_id || food_id === "")) {
+		console.error("Validation failed: No stall_id or food_id provided");
+		req.flash(
+			"error",
+			"Please select either a stall or a food item to favorite"
+		);
+		return res.redirect(redirectPath);
+	}
+
+	// Check if already favorited
+	const checkSql = `
         SELECT * FROM favorites 
         WHERE user_id = ? 
         AND ((stall_id = ? AND ? IS NOT NULL AND ? != '') OR (food_id = ? AND ? IS NOT NULL AND ? != ''))`;
-    
-    db.query(checkSql, [
-        user_id, 
-        stall_id, stall_id, stall_id, 
-        food_id, food_id, food_id
-    ], (err, results) => {
-        if (err) {
-            console.error("Error checking for existing favorite:", err);
-            req.flash("error", "Error processing your request");
-            return res.redirect(redirectPath);
-        }
-        
-        if (results.length > 0) {
-            console.log("Item already in favorites");
-            req.flash("info", "This item is already in your favorites");
-            return res.redirect(redirectPath);
-        }
 
-        // Insert new favorite
-        const insertSql = `
+	db.query(
+		checkSql,
+		[user_id, stall_id, stall_id, stall_id, food_id, food_id, food_id],
+		(err, results) => {
+			if (err) {
+				console.error("Error checking for existing favorite:", err);
+				req.flash("error", "Error processing your request");
+				return res.redirect(redirectPath);
+			}
+
+			if (results.length > 0) {
+				console.log("Item already in favorites");
+				req.flash("info", "This item is already in your favorites");
+				return res.redirect(redirectPath);
+			}
+
+			// Insert new favorite
+			const insertSql = `
             INSERT INTO favorites (user_id, stall_id, food_id, notes, created_at)
             VALUES (?, ?, ?, ?, NOW())`;
-        
-        // Convert empty strings to null for database
-        const safeStallId = stall_id && stall_id !== '' ? stall_id : null;
-        const safeFoodId = food_id && food_id !== '' ? food_id : null;
-        const safeNotes = notes && notes.trim() !== '' ? notes.trim() : null;
-            
-        db.query(
-            insertSql,
-            [user_id, safeStallId, safeFoodId, safeNotes],
-            (err, result) => {
-                if (err) {
-                    console.error("Error adding favorite:", err);
-                    req.flash("error", "Failed to add to favorites. Please try again.");
-                    return res.redirect(redirectPath);
-                }
-                
-                console.log("Favorite added successfully:", result);
-                req.flash("success", "Successfully added to favorites!");
-                res.redirect(redirectPath);
-            }
-        );
-    });
+
+			// Convert empty strings to null for database
+			const safeStallId = stall_id && stall_id !== "" ? stall_id : null;
+			const safeFoodId = food_id && food_id !== "" ? food_id : null;
+			const safeNotes = notes && notes.trim() !== "" ? notes.trim() : null;
+
+			db.query(
+				insertSql,
+				[user_id, safeStallId, safeFoodId, safeNotes],
+				(err, result) => {
+					if (err) {
+						console.error("Error adding favorite:", err);
+						req.flash("error", "Failed to add to favorites. Please try again.");
+						return res.redirect(redirectPath);
+					}
+
+					console.log("Favorite added successfully:", result);
+					req.flash("success", "Successfully added to favorites!");
+					res.redirect(redirectPath);
+				}
+			);
+		}
+	);
 });
 
 // Edit favorite form (GET)
 app.get(
-    "/favorites/edit/:id",
-    checkAuthenticated,
-    checkFavoriteOwnershipOrAdmin,
-    (req, res) => {
-        const sql = `
+	"/favorites/edit/:id",
+	checkAuthenticated,
+	checkFavoriteOwnershipOrAdmin,
+	(req, res) => {
+		const sql = `
             SELECT f.id, f.notes, f.stall_id, f.food_id, s.name AS stall_name, fd.name AS food_name
             FROM favorites f
             LEFT JOIN stalls s ON f.stall_id = s.id
             LEFT JOIN food_items fd ON f.food_id = fd.id
             WHERE f.id = ?`;
 
-        db.query(sql, [req.params.id], (err, results) => {
-            if (err) {
-                console.error("Error fetching favorite:", err);
-                req.flash("error", "Error loading favorite");
-                return res.redirect("/favorites");
-            }
-            if (!results.length) {
-                req.flash("error", "Favorite not found");
-                return res.redirect("/favorites");
-            }
+		db.query(sql, [req.params.id], (err, results) => {
+			if (err) {
+				console.error("Error fetching favorite:", err);
+				req.flash("error", "Error loading favorite");
+				return res.redirect("/favorites");
+			}
+			if (!results.length) {
+				req.flash("error", "Favorite not found");
+				return res.redirect("/favorites");
+			}
 
-            res.render("editFavorite", {
-                title: "Edit Favorite",
-                user: req.session.user,
-                favorite: results[0],
-                messages: req.flash()
-            });
-        });
-    }
+			res.render("editFavorite", {
+				title: "Edit Favorite",
+				user: req.session.user,
+				favorite: results[0],
+				messages: req.flash(),
+			});
+		});
+	}
 );
 
 // Update favorite (POST)
 app.post(
-    "/favorites/update/:id",
-    checkAuthenticated,
-    checkFavoriteOwnershipOrAdmin,
-    (req, res) => {
-        const { notes, redirect_to } = req.body;
-        const redirectPath = redirect_to || '/favorites';
-        const sql = `
+	"/favorites/update/:id",
+	checkAuthenticated,
+	checkFavoriteOwnershipOrAdmin,
+	(req, res) => {
+		const { notes, redirect_to } = req.body;
+		const redirectPath = redirect_to || "/favorites";
+		const sql = `
             UPDATE favorites 
             SET notes = ?, updated_at = NOW() 
             WHERE id = ?`;
 
-        db.query(sql, [notes || null, req.params.id], (err) => {
-            if (err) {
-                console.error("Error updating favorite:", err);
-                req.flash("error", "Failed to update favorite");
-                return res.redirect(redirectPath);
-            }
-            req.flash("success", "Favorite updated successfully!");
-            res.redirect(redirectPath);
-        });
-    }
+		db.query(sql, [notes || null, req.params.id], (err) => {
+			if (err) {
+				console.error("Error updating favorite:", err);
+				req.flash("error", "Failed to update favorite");
+				return res.redirect(redirectPath);
+			}
+			req.flash("success", "Favorite updated successfully!");
+			res.redirect(redirectPath);
+		});
+	}
 );
 
 // Delete favorite (using POST for better browser compatibility)
-app.post("/favorites/delete/:id", checkAuthenticated, checkFavoriteOwnershipOrAdmin, (req, res) => {
-    const { id } = req.params;
-    const redirectTo = req.body.redirect_to || '/favorites';
-    const userId = req.session.user.id;
-    const isAdmin = req.session.user.isAdmin;
-    
-    // First get the favorite to log who deleted it
-    db.query('SELECT * FROM favorites WHERE id = ?', [id], (err, results) => {
-        if (err) {
-            console.error('Error finding favorite to delete:', err);
-            req.flash('error', 'Error deleting favorite');
-            return res.redirect(redirectTo);
-        }
-        
-        if (!results.length) {
-            req.flash('error', 'Favorite not found');
-            return res.redirect(redirectTo);
-        }
-        
-        const favorite = results[0];
-        
-        // Double-check ownership (belt and suspenders approach)
-        if (!isAdmin && favorite.user_id !== userId) {
-            req.flash('error', 'You do not have permission to delete this favorite');
-            return res.redirect(redirectTo);
-        }
-        
-        // Now delete the favorite
-        db.query('DELETE FROM favorites WHERE id = ?', [id], (err, result) => {
-            if (err) {
-                console.error('Error deleting favorite:', err);
-                req.flash('error', 'Failed to delete favorite');
-                return res.redirect(redirectTo);
-            }
-            
-            if (result.affectedRows === 0) {
-                req.flash('warning', 'Favorite not found or already deleted');
-            } else {
-                console.log(`Favorite ${id} deleted by user ${userId} (${isAdmin ? 'admin' : 'owner'})`);
-                req.flash('success', 'Favorite removed successfully');
-            }
-            
-            res.redirect(redirectTo);
-        });
-    });
-});
+app.post(
+	"/favorites/delete/:id",
+	checkAuthenticated,
+	checkFavoriteOwnershipOrAdmin,
+	(req, res) => {
+		const { id } = req.params;
+		const redirectTo = req.body.redirect_to || "/favorites";
+		const userId = req.session.user.id;
+		const isAdmin = req.session.user.isAdmin;
+
+		// First get the favorite to log who deleted it
+		db.query("SELECT * FROM favorites WHERE id = ?", [id], (err, results) => {
+			if (err) {
+				console.error("Error finding favorite to delete:", err);
+				req.flash("error", "Error deleting favorite");
+				return res.redirect(redirectTo);
+			}
+
+			if (!results.length) {
+				req.flash("error", "Favorite not found");
+				return res.redirect(redirectTo);
+			}
+
+			const favorite = results[0];
+
+			// Double-check ownership (belt and suspenders approach)
+			if (!isAdmin && favorite.user_id !== userId) {
+				req.flash(
+					"error",
+					"You do not have permission to delete this favorite"
+				);
+				return res.redirect(redirectTo);
+			}
+
+			// Now delete the favorite
+			db.query("DELETE FROM favorites WHERE id = ?", [id], (err, result) => {
+				if (err) {
+					console.error("Error deleting favorite:", err);
+					req.flash("error", "Failed to delete favorite");
+					return res.redirect(redirectTo);
+				}
+
+				if (result.affectedRows === 0) {
+					req.flash("warning", "Favorite not found or already deleted");
+				} else {
+					console.log(
+						`Favorite ${id} deleted by user ${userId} (${
+							isAdmin ? "admin" : "owner"
+						})`
+					);
+					req.flash("success", "Favorite removed successfully");
+				}
+
+				res.redirect(redirectTo);
+			});
+		});
+	}
+);
 
 // Hawker Stalls
 app.get("/stalls", (req, res) => {
 	const { search, cuisine, location } = req.query;
-  
-	const cuisineQuery = "SELECT DISTINCT cuisine FROM stalls";
+
+	const cuisineQuery = "SELECT DISTINCT cuisine_type FROM stalls";
 	db.query(cuisineQuery, (err, cuisineResults) => {
-	  if (err) throw err;
-	  const cuisineList = cuisineResults; // ✅ just use the full array
+		if (err) {
+			console.error("Error fetching cuisines:", err);
+			req.flash("error", "Failed to load cuisines");
+			return res.redirect("/");
+		}
+		const cuisineList = cuisineResults; // ✅ just use the full array
 
-	  let sql = "SELECT * FROM stalls WHERE 1=1";
-	  const params = [];
+		let sql = "SELECT * FROM stalls WHERE 1=1";
+		const params = [];
 
-	  if (search) {
-		sql += " AND name LIKE ?";
-		params.push(`%${search}%`);
-	  }
+		if (search) {
+			sql += " AND name LIKE ?";
+			params.push(`%${search}%`);
+		}
 
-	  if (cuisine) {
-		sql += " AND cuisine = ?";
-		params.push(cuisine);
-	  }
+		if (cuisine) {
+			sql += " AND cuisine = ?";
+			params.push(cuisine);
+		}
 
-	  if (location) {
-		sql += " AND location LIKE ?";
-		params.push(`%${location}%`);
-	  }
+		if (location) {
+			sql += " AND location LIKE ?";
+			params.push(`%${location}%`);
+		}
 
-	  db.query(sql, params, (err, stalls) => {
-		if (err) throw err;
-		res.render("stalls", {
-		  title: "Stalls - Hawker Hero",
-		  user: req.session.user,
-		  messages: req.flash("success"),
-		  errors: req.flash("error"),
-		  stalls,
-		  query: req.query,
-		  cuisines: cuisineList,
-		  favourites: req.session.favourites || []
+		db.query(sql, params, (err, stalls) => {
+			if (err) throw err;
+			res.render("stalls", {
+				title: "Stalls - Hawker Hero",
+				user: req.session.user,
+				messages: req.flash("success"),
+				errors: req.flash("error"),
+				stalls,
+				query: req.query,
+				cuisines: cuisineList,
+				favourites: req.session.favourites || [],
+			});
 		});
-	  });
 	});
 });
-  
 
 app.get("/stalls/new", checkAuthenticated, checkAdmin, (req, res) => {
 	res.render("stalls-new", {
 		title: "Add Stall",
-		user: req.session.user  
-	  });
+		user: req.session.user,
+	});
 });
 
-app.post("/stalls", checkAuthenticated, checkAdmin, upload.single("image"), (req, res) => {
-	const { name, location, cuisine } = req.body;
-	const image = req.file ? req.file.filename : null;
-  
-	db.query("INSERT INTO stalls (name, location, cuisine, image) VALUES (?, ?, ?, ?)", 
-	  [name, location, cuisine, image], (err) => {
-	  if (err) throw err;
-	  res.redirect("/stalls");
-	});
-  });
-  
-  app.get("/stalls/:id", async (req, res) => {
-	const { id } = req.params;
-  
-	try {
-	  const stallSql = "SELECT * FROM stalls WHERE id = ?";
-	  const [stall] = await queryDB(stallSql, [id]);
-  
-	  if (!stall) {
-		req.flash("error", "Stall not found.");
-		return res.redirect("/stalls");
-	  }
-  
-	  // Optional: fetch food items for this stall
-	  const foodItemsSql = "SELECT * FROM food_items WHERE stall_id = ?";
-	  const foodItems = await queryDB(foodItemsSql, [id]);
-  
-	  res.render("stall-detail", {
-		title: stall.name + " - Hawker Hero",
-		user: req.session.user,
-		stall,
-		foodItems,
-		messages: req.flash("success"),
-		errors: req.flash("error"),
-	  });
-	} catch (err) {
-	  console.error("Error loading stall detail:", err);
-	  req.flash("error", "Error loading stall page.");
-	  res.redirect("/stalls");
+app.post(
+	"/stalls",
+	checkAuthenticated,
+	checkAdmin,
+	upload.single("image"),
+	(req, res) => {
+		const { name, location, cuisine } = req.body;
+		const image = req.file ? req.file.filename : null;
+
+		db.query(
+			"INSERT INTO stalls (name, location, cuisine, image) VALUES (?, ?, ?, ?)",
+			[name, location, cuisine, image],
+			(err) => {
+				if (err) throw err;
+				res.redirect("/stalls");
+			}
+		);
 	}
-  });
-  
+);
+
+app.get("/stalls/:id", async (req, res) => {
+	const { id } = req.params;
+
+	try {
+		const stallSql = "SELECT * FROM stalls WHERE id = ?";
+		const [stall] = await queryDB(stallSql, [id]);
+
+		if (!stall) {
+			req.flash("error", "Stall not found.");
+			return res.redirect("/stalls");
+		}
+
+		// Optional: fetch food items for this stall
+		const foodItemsSql = "SELECT * FROM food_items WHERE stall_id = ?";
+		const foodItems = await queryDB(foodItemsSql, [id]);
+
+		res.render("stall-detail", {
+			title: stall.name + " - Hawker Hero",
+			user: req.session.user,
+			stall,
+			foodItems,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+		});
+	} catch (err) {
+		console.error("Error loading stall detail:", err);
+		req.flash("error", "Error loading stall page.");
+		res.redirect("/stalls");
+	}
+});
+
 app.get("/stalls/:id/edit", checkAuthenticated, checkAdmin, (req, res) => {
 	const { id } = req.params;
 	db.query("SELECT * FROM stalls WHERE id = ?", [id], (err, results) => {
@@ -564,18 +598,27 @@ app.get("/stalls/:id/edit", checkAuthenticated, checkAdmin, (req, res) => {
 app.put("/stalls/:id", checkAuthenticated, checkAdmin, (req, res) => {
 	const { id } = req.params;
 	const { name, location, cuisine } = req.body;
-	db.query("UPDATE stalls SET name = ?, location = ?, cuisine = ? WHERE id = ?", [name, location, cuisine, id], (err) => {
-		if (err) throw err;
-		res.redirect("/stalls");
-	});
+	db.query(
+		"UPDATE stalls SET name = ?, location = ?, cuisine = ? WHERE id = ?",
+		[name, location, cuisine, id],
+		(err) => {
+			if (err) throw err;
+			res.redirect("/stalls");
+		}
+	);
 });
 
-app.delete("/stalls/:id", checkAuthenticated, checkAdmin, (req, res) => {
+app.delete("/stalls/:id", async (req, res) => {
 	const { id } = req.params;
-	db.query("DELETE FROM stalls WHERE id = ?", [id], (err) => {
-		if (err) throw err;
+	try {
+		await queryDB("DELETE FROM stalls WHERE id = ?", [id]);
+		req.flash("success", "Stall deleted successfully.");
 		res.redirect("/stalls");
-	});
+	} catch (err) {
+		console.error("Error deleting stall:", err);
+		req.flash("error", "Failed to delete stall.");
+		res.redirect("/stalls");
+	}
 });
 
 // Other modules

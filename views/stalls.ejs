@@ -29,7 +29,7 @@
 			<option value="">All Cuisines</option>
 			<% if (Array.isArray(cuisines) && cuisines.length > 0) { %>
 			  <% cuisines.forEach(c => { %>
-          <option value="<%= c %>" <%= query?.cuisine === c ? 'selected' : '' %>><%= c %></option>
+          <option value="<%= c %>" <%= query?.cuisine === c ? 'selected' : '' %>><%= c.cuisine_type %></option>
 			  <% }) %>
 			<% } else { %>
 			  <option disabled>No cuisines found</option>
