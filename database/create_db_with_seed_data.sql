@@ -196,3 +196,17 @@ SELECT 'Database and tables created with seed data successfully!' AS Status;
 -- SELECT * FROM reviews;
 -- SELECT * FROM recommendations;
 -- SELECT * FROM favorites;
+
+-- -----------------------------------------------------
+-- Table `comments`
+-- Description: Store comments made by users on reviews.
+-- -----------------------------------------------------
+CREATE TABLE comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    review_id INT NOT NULL,      -- FK to reviews table
+    user_id INT NOT NULL,        -- FK to users table
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
