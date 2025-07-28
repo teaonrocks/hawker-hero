@@ -171,13 +171,8 @@ router.get("/reviews", (req, res) => {
     });
 });
 
-// GET - Show add review form (Admin only)
+// GET - Show add review form (All authenticated users)
 router.get("/addReviews", checkAuthenticated, (req, res) => {
-  if (req.session.user.role !== "admin") {
-    req.flash("error", "User not authorized");
-    return res.redirect("/reviews");
-  }
-
   const sql = "SELECT id, name FROM stalls";
 
   db.query(sql, (err, stalls) => {
@@ -200,22 +195,17 @@ router.get("/addReviews", checkAuthenticated, (req, res) => {
   });
 });
 
-// POST - Submit review (Admin only)
+// POST - Submit review (All authenticated users)
 router.post(
   "/addReviews",
   checkAuthenticated,
   upload.single("image"),
   (req, res) => {
-    if (req.session.user.role !== "admin") {
-      req.flash("error", "User not authorized");
-      return res.redirect("/reviews");
-    }
-
     const { stall_id, rating, comment } = req.body;
     let imageUrl = null;
 
     if (req.file) {
-      imageUrl = "/images/" + req.file.filename; // Public path to image in public/images
+      imageUrl = req.file.filename; // Store just the filename, not the full path
     }
 
     // Field validation

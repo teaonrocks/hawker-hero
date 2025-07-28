@@ -21,7 +21,7 @@
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="bi bi-lightbulb"></i> Recommendations</h1>
-            <% if (user && user.role === 'admin') { %>
+            <% if (user) { %>
             <button
               class="btn btn-primary"
               data-bs-toggle="modal"
@@ -119,7 +119,7 @@
                         <small class="text-muted">
                           <i class="bi bi-person-circle"></i> by <%= rec.username %> • <%= new Date(rec.created_at).toLocaleDateString() %>
                         </small>
-                        <% if (user && user.role === 'admin') { %>
+                        <% if (user && (user.id === rec.user_id || user.role === 'admin')) { %>
                           <div>
                             <!-- Edit button (opens modal for edit) -->
                             <button class="btn btn-sm btn-outline-secondary me-1"
@@ -149,7 +149,7 @@
                 <i class="bi bi-lightbulb text-muted" style="font-size: 4rem;"></i>
                 <h4 class="mt-3 text-muted">No recommendations yet</h4>
                 <p class="text-muted">Share your insider tips with the community!</p>
-                <% if (user && user.role === 'admin') { %>
+                <% if (user) { %>
                   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecommendationModal">
                     Add First Recommendation
                   </button>
@@ -161,8 +161,8 @@
       </div>
     </div>
 
-    <!-- Add Recommendation Modal (Admin Only) -->
-    <% if (user && user.role === 'admin') { %>
+    <!-- Add Recommendation Modal (All Users) -->
+    <% if (user) { %>
       <div class="modal fade" id="addRecommendationModal" tabindex="-1" aria-labelledby="addRecommendationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">

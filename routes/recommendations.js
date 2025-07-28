@@ -102,14 +102,13 @@ router.get("/recommendations", async (req, res) => {
 	}
 });
 
-// POST - Add new recommendation (Admin Only)
+// POST - Add new recommendation (All authenticated users)
 router.post(
 	"/recommendations/add",
 	checkAuthenticated,
-	checkAdmin,
 	async (req, res) => {
 		const { stall_id, food_id, tip } = req.body;
-		const user_id = req.session.user.id; // Admin's user ID
+		const user_id = req.session.user.id; // Current user's ID
 
 		if (!stall_id || !tip) {
 			req.flash("error", "Stall and Tip are required to add a recommendation.");
@@ -133,14 +132,15 @@ router.post(
 	}
 );
 
-// POST - Update recommendation (Admin Only)
+// POST - Update recommendation (User can edit their own, Admin can edit any)
 router.post(
 	"/recommendations/edit/:id",
 	checkAuthenticated,
-	checkAdmin,
 	async (req, res) => {
 		const { id } = req.params;
 		const { stall_id, food_id, tip } = req.body;
+		const userId = req.session.user.id;
+		const isAdmin = req.session.user.role === "admin";
 
 		if (!stall_id || !tip) {
 			req.flash(
@@ -151,12 +151,26 @@ router.post(
 		}
 
 		try {
+			// First check if user owns this recommendation or is admin
+			const checkSql = "SELECT user_id FROM recommendations WHERE id = ?";
+			const [recommendation] = await queryDB(checkSql, [id]);
+			
+			if (!recommendation) {
+				req.flash("error", "Recommendation not found.");
+				return res.redirect("/recommendations");
+			}
+			
+			if (!isAdmin && recommendation.user_id !== userId) {
+				req.flash("error", "You can only edit your own recommendations.");
+				return res.redirect("/recommendations");
+			}
+
 			const updateSql =
 				"UPDATE recommendations SET stall_id = ?, food_id = ?, tip = ? WHERE id = ?";
 			const actualFoodId = food_id === "" ? null : food_id;
 			await queryDB(updateSql, [stall_id, actualFoodId, tip, id]);
 
-			req.flash("success", `Recommendation ID ${id} updated successfully!`);
+			req.flash("success", `Recommendation updated successfully!`);
 			res.redirect("/recommendations");
 		} catch (err) {
 			console.error("Database error updating recommendation:", err);
@@ -166,19 +180,34 @@ router.post(
 	}
 );
 
-// POST - Delete recommendation (Admin Only)
+// POST - Delete recommendation (User can delete their own, Admin can delete any)
 router.post(
 	"/recommendations/delete/:id",
 	checkAuthenticated,
-	checkAdmin,
 	async (req, res) => {
 		const { id } = req.params;
+		const userId = req.session.user.id;
+		const isAdmin = req.session.user.role === "admin";
 
 		try {
+			// First check if user owns this recommendation or is admin
+			const checkSql = "SELECT user_id FROM recommendations WHERE id = ?";
+			const [recommendation] = await queryDB(checkSql, [id]);
+			
+			if (!recommendation) {
+				req.flash("error", "Recommendation not found.");
+				return res.redirect("/recommendations");
+			}
+			
+			if (!isAdmin && recommendation.user_id !== userId) {
+				req.flash("error", "You can only delete your own recommendations.");
+				return res.redirect("/recommendations");
+			}
+
 			const deleteSql = "DELETE FROM recommendations WHERE id = ?";
 			await queryDB(deleteSql, [id]);
 
-			req.flash("success", `Recommendation ID ${id} deleted successfully!`);
+			req.flash("success", `Recommendation deleted successfully!`);
 			res.redirect("/recommendations");
 		} catch (err) {
 			console.error("Database error deleting recommendation:", err);
