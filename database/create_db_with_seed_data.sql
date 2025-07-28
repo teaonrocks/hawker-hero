@@ -136,7 +136,7 @@ INSERT INTO users (username, email, password_hash, role) VALUES
 INSERT INTO hawker_centers (name, address, facilities, image_url) VALUES
 ('Maxwell Food Centre', '1 Kadayanallur St, Singapore 069184', 'Toilets, Seating, Open-air, Variety', 'maxwell-food-centre.jpg'),
 ('Tiong Bahru Market', '30 Seng Poh Rd, Singapore 168898', 'Toilets, Seating, Wet Market, Iconic', 'tiongbahrumarket.jpg'),
-('Old Airport Road Food Centre', '51 Old Airport Rd, Singapore 390051', 'Toilets, Seating, Huge Variety, Parking', 'oldairportroadfoodcenter');
+('Old Airport Road Food Centre', '51 Old Airport Rd, Singapore 390051', 'Toilets, Seating, Huge Variety, Parking', 'oldairportroadfoodcenter.jpg');
 
 -- Stalls (linked to Hawker Centers)
 INSERT INTO stalls (name, location, cuisine_type, center_id, opening_hours, image_url) VALUES
