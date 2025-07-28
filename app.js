@@ -12,7 +12,7 @@ const favoritesRoutes = require("./routes/favorites");
 const stallsRoutes = require("./routes/stalls");
 const reviewsRoutes = require("./routes/reviews");
 const recommendationsRoutes = require("./routes/recommendations");
-const generalRoutes = require("./routes/general");
+const hawkerCentersRoutes = require("./routes/hawker-centers");
 const foodItemsRoutes = require("./routes/food-items");
 
 // Middleware
@@ -39,7 +39,7 @@ app.use("/", favoritesRoutes);
 app.use("/", stallsRoutes);
 app.use("/", reviewsRoutes);
 app.use("/", recommendationsRoutes);
-app.use("/", generalRoutes);
+app.use("/", hawkerCentersRoutes);
 app.use("/", foodItemsRoutes);
 
 app.listen(process.env.PORT || 3000, () => {

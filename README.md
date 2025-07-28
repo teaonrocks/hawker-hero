@@ -65,7 +65,7 @@ The application is structured into 6 core modules, each managing a specific aspe
 │   ├── auth.js                        # Authentication related routes
 │   ├── favorites.js                   # Favorite items routes
 │   ├── food-items.js                  # Food items routes
-│   ├── general.js                     # General application routes
+│   ├── hawker-centers.js              # Hawker centers routes with CRUD operations
 │   ├── recommendations.js             # Recommendation routes
 │   ├── reviews.js                     # Review routes
 │   └── stalls.js                      # Hawker stall routes
