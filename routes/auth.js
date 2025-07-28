@@ -110,26 +110,27 @@ router.post("/login", (req, res) => {
 // Dashboard and admin routes
 router.get("/dashboard", checkAuthenticated, async (req, res) => {
 	const userId = req.session.user.id;
-	
+
 	try {
-		// Get user statistics
+		// Get user statistics - count of user's contributions
 		const [reviewsCount] = await queryDB(
-			"SELECT COUNT(*) as count FROM reviews WHERE user_id = ?", 
-			[userId]
-		);
-		
-		const [favoritesCount] = await queryDB(
-			"SELECT COUNT(*) as count FROM favorites WHERE user_id = ?", 
-			[userId]
-		);
-		
-		const [recommendationsCount] = await queryDB(
-			"SELECT COUNT(*) as count FROM recommendations WHERE user_id = ?", 
+			"SELECT COUNT(*) as count FROM reviews WHERE user_id = ?",
 			[userId]
 		);
 
-		// Get recent reviews (last 3)
-		const recentReviews = await queryDB(`
+		const [favoritesCount] = await queryDB(
+			"SELECT COUNT(*) as count FROM favorites WHERE user_id = ?",
+			[userId]
+		);
+
+		const [recommendationsCount] = await queryDB(
+			"SELECT COUNT(*) as count FROM recommendations WHERE user_id = ?",
+			[userId]
+		);
+
+		// Get recent reviews with stall and hawker center information (last 3)
+		const recentReviews = await queryDB(
+			`
 			SELECT r.*, s.name as stall_name, s.location, hc.name as center_name
 			FROM reviews r
 			JOIN stalls s ON r.stall_id = s.id
@@ -137,10 +138,13 @@ router.get("/dashboard", checkAuthenticated, async (req, res) => {
 			WHERE r.user_id = ?
 			ORDER BY r.created_at DESC
 			LIMIT 3
-		`, [userId]);
+		`,
+			[userId]
+		);
 
-		// Get recent favorites (last 3)
-		const recentFavorites = await queryDB(`
+		// Get recent favorites with full stall and food information (last 3)
+		const recentFavorites = await queryDB(
+			`
 			SELECT f.*, s.name as stall_name, s.location, hc.name as center_name,
 				   fi.name as food_name
 			FROM favorites f
@@ -150,10 +154,13 @@ router.get("/dashboard", checkAuthenticated, async (req, res) => {
 			WHERE f.user_id = ?
 			ORDER BY f.created_at DESC
 			LIMIT 3
-		`, [userId]);
+		`,
+			[userId]
+		);
 
-		// Get recent recommendations (last 3)
-		const recentRecommendations = await queryDB(`
+		// Get recent recommendations with stall and food details (last 3)
+		const recentRecommendations = await queryDB(
+			`
 			SELECT rc.*, s.name as stall_name, fi.name as food_name
 			FROM recommendations rc
 			JOIN stalls s ON rc.stall_id = s.id
@@ -161,42 +168,44 @@ router.get("/dashboard", checkAuthenticated, async (req, res) => {
 			WHERE rc.user_id = ?
 			ORDER BY rc.created_at DESC
 			LIMIT 3
-		`, [userId]);
+		`,
+			[userId]
+		);
 
-		// Get recent activity (combined from reviews, favorites, recommendations)
+		// Create unified activity timeline by combining all user actions
 		const recentActivity = [];
 
-		// Add recent reviews to activity
-		recentReviews.forEach(review => {
+		// Add recent reviews to activity timeline
+		recentReviews.forEach((review) => {
 			recentActivity.push({
-				type: 'review',
-				icon: 'bi-star-fill text-warning',
+				type: "review",
+				icon: "bi-star-fill text-warning",
 				text: `You reviewed <strong>${review.stall_name}</strong>`,
 				date: review.created_at,
-				details: review.rating + ' stars'
+				details: review.rating + " stars",
 			});
 		});
 
 		// Add recent favorites to activity
-		recentFavorites.forEach(favorite => {
+		recentFavorites.forEach((favorite) => {
 			const itemName = favorite.food_name || favorite.stall_name;
 			recentActivity.push({
-				type: 'favorite',
-				icon: 'bi-heart-fill text-danger',
+				type: "favorite",
+				icon: "bi-heart-fill text-danger",
 				text: `You added <strong>${itemName}</strong> to favorites`,
 				date: favorite.created_at,
-				details: favorite.notes ? `Note: ${favorite.notes}` : null
+				details: favorite.notes ? `Note: ${favorite.notes}` : null,
 			});
 		});
 
 		// Add recent recommendations to activity
-		recentRecommendations.forEach(rec => {
+		recentRecommendations.forEach((rec) => {
 			recentActivity.push({
-				type: 'recommendation',
-				icon: 'bi-lightbulb-fill text-success',
+				type: "recommendation",
+				icon: "bi-lightbulb-fill text-success",
 				text: `You shared a recommendation for <strong>${rec.stall_name}</strong>`,
 				date: rec.created_at,
-				details: rec.tip.substring(0, 50) + (rec.tip.length > 50 ? '...' : '')
+				details: rec.tip.substring(0, 50) + (rec.tip.length > 50 ? "..." : ""),
 			});
 		});
 
@@ -212,12 +221,12 @@ router.get("/dashboard", checkAuthenticated, async (req, res) => {
 			stats: {
 				reviewsCount: reviewsCount.count,
 				favoritesCount: favoritesCount.count,
-				recommendationsCount: recommendationsCount.count
+				recommendationsCount: recommendationsCount.count,
 			},
 			recentReviews,
 			recentFavorites,
 			recentRecommendations,
-			recentActivity: limitedActivity
+			recentActivity: limitedActivity,
 		});
 	} catch (error) {
 		console.error("Dashboard error:", error);
@@ -229,12 +238,12 @@ router.get("/dashboard", checkAuthenticated, async (req, res) => {
 			stats: {
 				reviewsCount: 0,
 				favoritesCount: 0,
-				recommendationsCount: 0
+				recommendationsCount: 0,
 			},
 			recentReviews: [],
 			recentFavorites: [],
 			recentRecommendations: [],
-			recentActivity: []
+			recentActivity: [],
 		});
 	}
 });

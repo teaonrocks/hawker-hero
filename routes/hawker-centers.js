@@ -6,7 +6,7 @@ const { checkAuthenticated, checkAdmin } = require("../middleware/auth");
 const multer = require("multer");
 const path = require("path");
 
-// Setup Multer for image uploads
+// Setup Multer for image uploads to public/images directory
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		cb(null, "public/images");
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// GET - Hawker Centers page with filtering
+// GET - Hawker Centers page with search and facilities filtering
 router.get("/hawker-centers", async (req, res) => {
 	// Get filter values from the query string
 	const { search, facilities } = req.query;
@@ -27,7 +27,7 @@ router.get("/hawker-centers", async (req, res) => {
 		facilities: facilities || "",
 	};
 
-	// Base SQL query
+	// Base SQL query with JOIN to get stall count for each hawker center
 	let sql = `
 		SELECT hc.*, 
 		       COUNT(s.id) as stall_count

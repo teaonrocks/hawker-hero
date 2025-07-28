@@ -1,38 +1,56 @@
 # Hawker Hero
 
-![Project Status](https://img.shields.io/badge/Status-In%20Progress-blue)
+![Project Status](https://img.shields.io/badge/Status-Complete-brightgreen)
 
 ## 🌟 Project Overview
 
-Hawker Hero is a web application designed to help users explore, rate, and recommend Singapore's vibrant hawker stalls. Built with a focus on a youth perspective, it offers comprehensive CRUD (Create, Read, Update, Delete) and search functionalities across various modules, distinguishing access levels between regular users and administrators. The goal is to provide an engaging platform for discovering and sharing insights about Singapore's rich hawker culture.
+Hawker Hero is a comprehensive web application designed to help users explore, rate, and recommend Singapore's vibrant hawker stalls. Built with a focus on community engagement and user experience, it offers full CRUD (Create, Read, Update, Delete) operations, advanced search and filtering capabilities, and role-based access control. The platform provides an engaging way to discover and share insights about Singapore's rich hawker culture.
 
-## ✨ Features
+## ✨ Key Features
 
-The application is structured into 6 core modules, each managing a specific aspect of hawker culture:
+### Core Functionality
 
-- **Hawker Stalls**: Manage hawker stall listings (name, location, cuisine type).
-  - **User Role**: View and Search.
-  - **Admin Role**: Full CRUD and Search.
-- **Food Items**: Manage food items offered by stalls (name, price, description).
-  - **User Role**: View and Search.
-  - **Admin Role**: Full CRUD and Search.
-- **Ratings & Reviews**: Manage user ratings and reviews for stalls/food (rating, comment).
-  - **User Role**: View, Search, Create, Update, Delete.
-  - **Admin Role**: Full CRUD and Search.
-- **User Recommendations**: Manage user-generated recommendations (must-try items, tips).
-  - **User Role**: View, Search, Create, Update, Delete.
-  - **Admin Role**: Full CRUD and Search.
-- **Hawker Centers**: Manage hawker center locations (name, address, facilities).
-  - **User Role**: View and Search.
-  - **Admin Role**: Full CRUD and Search.
-- **User Favorites**: Manage user favorite stalls/food items (bookmarking system).
-  - **User Role**: View, Search, Create, Update, Delete.
-  - **Admin Role**: Full CRUD and Search.
+- **User Authentication**: Secure registration and login system with role-based access (User/Admin)
+- **Interactive Dashboard**: Personalized user dashboard with activity timeline and statistics
+- **Image Upload**: Support for review and stall images with Multer integration
+- **Advanced Search**: Multi-criteria search and filtering across all modules
+- **Responsive Design**: Mobile-friendly interface built with Bootstrap 5.3.2
 
-**Role-Based Access:**
+### Module Features
 
-- **User Role**: Primarily read-only access (can view and search). Specific modules like Reviews, Recommendations, and Favorites allow users to create, update, and delete their _own_ entries.
-- **Admin Role**: Full CRUD access across all modules.
+- **Hawker Centers**: Complete management of hawker center locations with facilities information
+  - **User Role**: View, search, and filter by location/facilities
+  - **Admin Role**: Full CRUD operations with image upload support
+- **Hawker Stalls**: Comprehensive stall management with detailed information
+
+  - **User Role**: View and search stalls by various criteria
+  - **Admin Role**: Full CRUD operations with center associations
+
+- **Food Items**: Detailed food item catalog with pricing and descriptions
+
+  - **User Role**: View and search food items
+  - **Admin Role**: Full CRUD operations with stall associations
+
+- **Reviews & Ratings**: User-generated reviews with ratings and optional images
+
+  - **User Role**: Create, view, edit, and delete own reviews
+  - **Admin Role**: Full management of all reviews with moderation capabilities
+
+- **Recommendations**: Community recommendations for must-try items and tips
+
+  - **User Role**: Create, view, edit, and delete own recommendations
+  - **Admin Role**: Full management of all recommendations
+
+- **User Favorites**: Personal bookmarking system for stalls and food items
+  - **User Role**: Manage personal favorites collection
+  - **Admin Role**: Administrative oversight of all user favorites
+
+### Enhanced User Experience
+
+- **Ownership Controls**: Users can only edit/delete their own content (reviews, recommendations, favorites)
+- **Real-time Dashboard**: Activity timeline showing recent user actions and contributions
+- **Smart Filtering**: Advanced filtering options for better content discovery
+- **Flash Messaging**: User-friendly feedback for all actions and operations
 
 ## 🚀 Technology Stack
 
@@ -44,7 +62,7 @@ The application is structured into 6 core modules, each managing a specific aspe
 
 ## 📦 Project Structure
 
-```
+```text
 .
 ├── config/                            # Configuration files
 │   └── database.js                    # Database connection configuration
@@ -173,17 +191,53 @@ This project uses environment variables to manage sensitive information and conf
 
 Once everything is set up:
 
-1.  **Start the server:**
+1. **Start the server:**
 
-    ```bash
-    npx nodemon app.js
-    ```
+   ```bash
+   npx nodemon app.js
+   ```
 
-    _(Note: You might need to define a "start" script in your `package.json` like `"start": "node app.js"`)_
+   _(Note: You might need to define a "start" script in your `package.json` like `"start": "node app.js"`)_
 
-2.  **Access the application:**
-    Open your web browser and navigate to:
-    `http://localhost:<PORT>` (e.g., `http://localhost:3000`)
+2. **Access the application:**
+   Open your web browser and navigate to:
+   `http://localhost:<PORT>` (e.g., `http://localhost:3000`)
+
+## 🔐 User Accounts
+
+The application includes pre-seeded user accounts for testing:
+
+### Admin Account
+
+- **Username**: admin
+- **Password**: password
+- **Role**: Administrator (full CRUD access to all modules)
+
+### Regular User Account
+
+- **Username**: testuser
+- **Password**: password
+- **Role**: User (can create/edit own content in reviews, recommendations, and favorites)
+
+## 📱 Application Features
+
+### Dashboard
+
+- Personal activity timeline showing recent actions
+- Statistics on user contributions (reviews, recommendations, favorites)
+- Quick access to recent content
+
+### Advanced Search & Filtering
+
+- Search across all modules with keyword matching
+- Filter by various criteria (ratings, price range, facilities, etc.)
+- Sort options for better content discovery
+
+### Image Management
+
+- Upload images for reviews and stall listings
+- Automatic image handling with Multer
+- Responsive image display in the interface
 
 ## 🤝 Contributors
 
@@ -196,4 +250,4 @@ This project is a collaborative effort by the following individuals, with specif
 - Syaz
 - Trevor
 
-_(Feel free to update this section to clarify specific module responsibilities for each person, if known.)_
+**Note:** Each contributor worked on different aspects of the application development and testing.

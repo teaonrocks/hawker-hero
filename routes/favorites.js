@@ -187,15 +187,12 @@ router.get("/favorites/add", checkAuthenticated, async (req, res) => {
 
 // Add favorite (POST)
 router.post("/favorites/add", checkAuthenticated, (req, res) => {
-	console.log("Add favorite request body:", req.body); // Debug log
-
 	const { stall_id, food_id, notes, redirect_to } = req.body;
 	const user_id = req.session.user.id;
 	const redirectPath = redirect_to || "/favorites";
 
 	// Validate that at least one ID is provided
 	if ((!stall_id || stall_id === "") && (!food_id || food_id === "")) {
-		console.error("Validation failed: No stall_id or food_id provided");
 		req.flash(
 			"error",
 			"Please select either a stall or a food item to favorite"
@@ -225,12 +222,9 @@ router.post("/favorites/add", checkAuthenticated, (req, res) => {
 		}
 
 		if (results.length > 0) {
-			console.log("Item already in favorites");
 			req.flash("info", "This item is already in your favorites");
 			return res.redirect(redirectPath);
-		}
-
-		// Insert new favorite
+		} // Insert new favorite
 		const insertSql = `
             INSERT INTO favorites (user_id, stall_id, food_id, notes, created_at)
             VALUES (?, ?, ?, ?, NOW())`;
@@ -250,7 +244,6 @@ router.post("/favorites/add", checkAuthenticated, (req, res) => {
 					return res.redirect(redirectPath);
 				}
 
-				console.log("Favorite added successfully:", result);
 				req.flash("success", "Successfully added to favorites!");
 				res.redirect(redirectPath);
 			}
@@ -437,11 +430,6 @@ router.post(
 				if (result.affectedRows === 0) {
 					req.flash("warning", "Favorite not found or already deleted");
 				} else {
-					console.log(
-						`Favorite ${id} deleted by user ${userId} (${
-							isAdmin ? "admin" : "owner"
-						})`
-					);
 					req.flash("success", "Favorite removed successfully");
 				}
 
@@ -469,7 +457,6 @@ router.post(
 			if (result.affectedRows === 0) {
 				req.flash("warning", "Favorite not found or already deleted");
 			} else {
-				console.log(`Favorite ${id} deleted by admin`);
 				req.flash("success", "Favorite removed successfully");
 			}
 			res.redirect(redirectTo);

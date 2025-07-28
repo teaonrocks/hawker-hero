@@ -103,34 +103,30 @@ router.get("/recommendations", async (req, res) => {
 });
 
 // POST - Add new recommendation (All authenticated users)
-router.post(
-	"/recommendations/add",
-	checkAuthenticated,
-	async (req, res) => {
-		const { stall_id, food_id, tip } = req.body;
-		const user_id = req.session.user.id; // Current user's ID
+router.post("/recommendations/add", checkAuthenticated, async (req, res) => {
+	const { stall_id, food_id, tip } = req.body;
+	const user_id = req.session.user.id; // Current user's ID
 
-		if (!stall_id || !tip) {
-			req.flash("error", "Stall and Tip are required to add a recommendation.");
-			return res.redirect("/recommendations");
-		}
-
-		try {
-			const insertSql =
-				"INSERT INTO recommendations (user_id, stall_id, food_id, tip, created_at) VALUES (?, ?, ?, ?, NOW())";
-			// Convert food_id to null if it's an empty string
-			const actualFoodId = food_id === "" ? null : food_id;
-			await queryDB(insertSql, [user_id, stall_id, actualFoodId, tip]);
-
-			req.flash("success", "Recommendation added successfully!");
-			res.redirect("/recommendations");
-		} catch (err) {
-			console.error("Database error adding recommendation:", err);
-			req.flash("error", "Failed to add recommendation. Please try again.");
-			res.redirect("/recommendations");
-		}
+	if (!stall_id || !tip) {
+		req.flash("error", "Stall and Tip are required to add a recommendation.");
+		return res.redirect("/recommendations");
 	}
-);
+
+	try {
+		const insertSql =
+			"INSERT INTO recommendations (user_id, stall_id, food_id, tip, created_at) VALUES (?, ?, ?, ?, NOW())";
+		// Convert food_id to null if it's an empty string
+		const actualFoodId = food_id === "" ? null : food_id;
+		await queryDB(insertSql, [user_id, stall_id, actualFoodId, tip]);
+
+		req.flash("success", "Recommendation added successfully!");
+		res.redirect("/recommendations");
+	} catch (err) {
+		console.error("Database error adding recommendation:", err);
+		req.flash("error", "Failed to add recommendation. Please try again.");
+		res.redirect("/recommendations");
+	}
+});
 
 // POST - Update recommendation (User can edit their own, Admin can edit any)
 router.post(
@@ -154,12 +150,12 @@ router.post(
 			// First check if user owns this recommendation or is admin
 			const checkSql = "SELECT user_id FROM recommendations WHERE id = ?";
 			const [recommendation] = await queryDB(checkSql, [id]);
-			
+
 			if (!recommendation) {
 				req.flash("error", "Recommendation not found.");
 				return res.redirect("/recommendations");
 			}
-			
+
 			if (!isAdmin && recommendation.user_id !== userId) {
 				req.flash("error", "You can only edit your own recommendations.");
 				return res.redirect("/recommendations");
@@ -193,12 +189,12 @@ router.post(
 			// First check if user owns this recommendation or is admin
 			const checkSql = "SELECT user_id FROM recommendations WHERE id = ?";
 			const [recommendation] = await queryDB(checkSql, [id]);
-			
+
 			if (!recommendation) {
 				req.flash("error", "Recommendation not found.");
 				return res.redirect("/recommendations");
 			}
-			
+
 			if (!isAdmin && recommendation.user_id !== userId) {
 				req.flash("error", "You can only delete your own recommendations.");
 				return res.redirect("/recommendations");

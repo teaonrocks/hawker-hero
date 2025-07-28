@@ -207,35 +207,42 @@
 							</h5>
 						</div>
 						<div class="card-body">
-							<% if (recentReviews && recentReviews.length > 0) { %>
-								<% recentReviews.forEach(function(review) { %>
-									<div class="border-bottom pb-3 mb-3">
-										<div class="d-flex justify-content-between align-items-start">
-											<div>
-												<h6 class="mb-1"><%= review.stall_name %></h6>
-												<small class="text-muted"><%= review.center_name || review.location %></small>
-											</div>
-											<div class="text-end">
-												<div class="text-warning">
-													<% for (let i = 0; i < 5; i++) { %>
-														<i class="bi <%= i < review.rating ? 'bi-star-fill' : 'bi-star' %>"></i>
-													<% } %>
-												</div>
-												<small class="text-muted"><%= new Date(review.created_at).toLocaleDateString() %></small>
-											</div>
-										</div>
-										<% if (review.comment) { %>
-											<p class="mb-0 mt-2 small text-muted">
-												"<%= review.comment.length > 60 ? review.comment.substring(0, 60) + '...' : review.comment %>"
-											</p>
-										<% } %>
+							<% if (recentReviews && recentReviews.length > 0) { %> <%
+							recentReviews.forEach(function(review) { %>
+							<div class="border-bottom pb-3 mb-3">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<h6 class="mb-1"><%= review.stall_name %></h6>
+										<small class="text-muted"
+											><%= review.center_name || review.location %></small
+										>
 									</div>
-								<% }); %>
-							<% } else { %>
-								<p class="text-muted text-center py-3">
-									<i class="bi bi-chat-dots" style="font-size: 2rem;"></i><br>
-									No reviews yet. <a href="/reviews">Write your first review</a>!
+									<div class="text-end">
+										<div class="text-warning">
+											<% for (let i = 0; i < 5; i++) { %>
+											<i
+												class="bi <%= i < review.rating ? 'bi-star-fill' : 'bi-star' %>"
+											></i>
+											<% } %>
+										</div>
+										<small class="text-muted"
+											><%= new Date(review.created_at).toLocaleDateString()
+											%></small
+										>
+									</div>
+								</div>
+								<% if (review.comment) { %>
+								<p class="mb-0 mt-2 small text-muted">
+									"<%= review.comment.length > 60 ? review.comment.substring(0,
+									60) + '...' : review.comment %>"
 								</p>
+								<% } %>
+							</div>
+							<% }); %> <% } else { %>
+							<p class="text-muted text-center py-3">
+								<i class="bi bi-chat-dots" style="font-size: 2rem"></i><br />
+								No reviews yet. <a href="/reviews">Write your first review</a>!
+							</p>
 							<% } %>
 
 							<div class="text-center">
@@ -256,41 +263,42 @@
 							</h5>
 						</div>
 						<div class="card-body">
-							<% if (recentFavorites && recentFavorites.length > 0) { %>
-								<% recentFavorites.forEach(function(favorite) { %>
-									<div class="border-bottom pb-3 mb-3">
-										<div class="d-flex align-items-center">
-											<div class="me-3">
-												<div
-													class="bg-light rounded d-flex align-items-center justify-content-center"
-													style="width: 50px; height: 50px"
-												>
-													<i class="bi bi-heart-fill text-danger"></i>
-												</div>
-											</div>
-											<div class="flex-grow-1">
-												<h6 class="mb-1"><%= favorite.food_name || favorite.stall_name %></h6>
-												<small class="text-muted">
-													<% if (favorite.food_name && favorite.stall_name) { %>
-														<%= favorite.stall_name %> • <%= favorite.center_name || favorite.location %>
-													<% } else { %>
-														<%= favorite.center_name || favorite.location %>
-													<% } %>
-												</small>
-												<% if (favorite.notes) { %>
-													<p class="mb-0 mt-1 small text-muted">
-														<i class="bi bi-sticky"></i> <%= favorite.notes %>
-													</p>
-												<% } %>
-											</div>
+							<% if (recentFavorites && recentFavorites.length > 0) { %> <%
+							recentFavorites.forEach(function(favorite) { %>
+							<div class="border-bottom pb-3 mb-3">
+								<div class="d-flex align-items-center">
+									<div class="me-3">
+										<div
+											class="bg-light rounded d-flex align-items-center justify-content-center"
+											style="width: 50px; height: 50px"
+										>
+											<i class="bi bi-heart-fill text-danger"></i>
 										</div>
 									</div>
-								<% }); %>
-							<% } else { %>
-								<p class="text-muted text-center py-3">
-									<i class="bi bi-heart" style="font-size: 2rem;"></i><br>
-									No favorites yet. <a href="/stalls">Start exploring</a> and add some favorites!
-								</p>
+									<div class="flex-grow-1">
+										<h6 class="mb-1">
+											<%= favorite.food_name || favorite.stall_name %>
+										</h6>
+										<small class="text-muted">
+											<% if (favorite.food_name && favorite.stall_name) { %> <%=
+											favorite.stall_name %> • <%= favorite.center_name ||
+											favorite.location %> <% } else { %> <%=
+											favorite.center_name || favorite.location %> <% } %>
+										</small>
+										<% if (favorite.notes) { %>
+										<p class="mb-0 mt-1 small text-muted">
+											<i class="bi bi-sticky"></i> <%= favorite.notes %>
+										</p>
+										<% } %>
+									</div>
+								</div>
+							</div>
+							<% }); %> <% } else { %>
+							<p class="text-muted text-center py-3">
+								<i class="bi bi-heart" style="font-size: 2rem"></i><br />
+								No favorites yet. <a href="/stalls">Start exploring</a> and add
+								some favorites!
+							</p>
 							<% } %>
 
 							<div class="text-center">
@@ -314,34 +322,48 @@
 						</div>
 						<div class="card-body">
 							<% if (recentActivity && recentActivity.length > 0) { %>
-								<div class="list-group list-group-flush">
-									<% recentActivity.forEach(function(activity) { %>
-										<div class="list-group-item border-0 px-0">
-											<div class="d-flex align-items-center">
-												<div class="me-3">
-													<i class="bi <%= activity.icon %>"></i>
-												</div>
-												<div class="flex-grow-1">
-													<p class="mb-0"><%- activity.text %></p>
-													<small class="text-muted"><%= new Date(activity.date).toLocaleDateString() %></small>
-													<% if (activity.details) { %>
-														<br><small class="text-muted"><%= activity.details %></small>
-													<% } %>
-												</div>
-											</div>
+							<div class="list-group list-group-flush">
+								<% recentActivity.forEach(function(activity) { %>
+								<div class="list-group-item border-0 px-0">
+									<div class="d-flex align-items-center">
+										<div class="me-3">
+											<i class="bi <%= activity.icon %>"></i>
 										</div>
-									<% }); %>
-								</div>
-							<% } else { %>
-								<div class="text-center py-4">
-									<i class="bi bi-activity text-muted" style="font-size: 3rem;"></i>
-									<h5 class="mt-3 text-muted">No activity yet</h5>
-									<p class="text-muted">Start exploring hawker food to see your activity here!</p>
-									<div class="d-flex justify-content-center gap-2">
-										<a href="/stalls" class="btn btn-sm btn-outline-primary">Browse Stalls</a>
-										<a href="/reviews" class="btn btn-sm btn-outline-primary">Write Review</a>
+										<div class="flex-grow-1">
+											<p class="mb-0"><%- activity.text %></p>
+											<small class="text-muted"
+												><%= new Date(activity.date).toLocaleDateString()
+												%></small
+											>
+											<% if (activity.details) { %>
+											<br /><small class="text-muted"
+												><%= activity.details %></small
+											>
+											<% } %>
+										</div>
 									</div>
 								</div>
+								<% }); %>
+							</div>
+							<% } else { %>
+							<div class="text-center py-4">
+								<i
+									class="bi bi-activity text-muted"
+									style="font-size: 3rem"
+								></i>
+								<h5 class="mt-3 text-muted">No activity yet</h5>
+								<p class="text-muted">
+									Start exploring hawker food to see your activity here!
+								</p>
+								<div class="d-flex justify-content-center gap-2">
+									<a href="/stalls" class="btn btn-sm btn-outline-primary"
+										>Browse Stalls</a
+									>
+									<a href="/reviews" class="btn btn-sm btn-outline-primary"
+										>Write Review</a
+									>
+								</div>
+							</div>
 							<% } %>
 						</div>
 					</div>

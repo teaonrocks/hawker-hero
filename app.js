@@ -2,11 +2,13 @@ const express = require("express");
 const session = require("express-session");
 const flash = require("connect-flash");
 const multer = require("multer");
-require("dotenv").config();
+require("dotenv").config(); // Load environment variables from .env file
 const methodOverride = require("method-override");
-const app = express();
 
-// Import routes
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Import route modules for different application features
 const authRoutes = require("./routes/auth");
 const favoritesRoutes = require("./routes/favorites");
 const stallsRoutes = require("./routes/stalls");
@@ -15,25 +17,24 @@ const recommendationsRoutes = require("./routes/recommendations");
 const hawkerCentersRoutes = require("./routes/hawker-centers");
 const foodItemsRoutes = require("./routes/food-items");
 
-// Middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static("public"));
-app.use(methodOverride("_method"));
+// Middleware setup for request parsing and static files
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.static("public")); // Serve static files from public directory
+app.set("view engine", "ejs"); // Set EJS as the template engine
 
-// Session Middleware
+// Session configuration for user authentication and state management
 app.use(
 	session({
-		secret: process.env.SESSION_SECRET || "hawker-hero-secret",
+		secret: process.env.SESSION_SECRET || "your-secret-key",
 		resave: false,
-		saveUninitialized: true,
-		cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }, // 7 days
+		saveUninitialized: false,
+		cookie: { secure: false },
 	})
 );
 
 app.use(flash());
-app.set("view engine", "ejs");
 
-// Use routes
+// Route configuration
 app.use("/", authRoutes);
 app.use("/", favoritesRoutes);
 app.use("/", stallsRoutes);
@@ -42,8 +43,7 @@ app.use("/", recommendationsRoutes);
 app.use("/", hawkerCentersRoutes);
 app.use("/", foodItemsRoutes);
 
-app.listen(process.env.PORT || 3000, () => {
-	console.log(
-		`Server is running on http://localhost:${process.env.PORT || 3000}`
-	);
+// Start server
+app.listen(PORT, () => {
+	console.log(`Server running on http://localhost:${PORT}`);
 });
