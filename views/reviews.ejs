@@ -133,10 +133,11 @@
 													<div class="bg-light rounded d-flex align-items-center justify-content-center overflow-hidden"
 														style="height: 120px">
 														<% if (review.image_url) { %>
-															<img src="<%= review.image_url %>" alt="Review Image"
-																style="max-width: 300px;">
-															<% } %>
-
+															<img src="/images/<%= review.image_url %>" alt="Review Image"
+																style="max-width: 100%; max-height: 100%; object-fit: cover;" class="rounded">
+														<% } else { %>
+															<i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+														<% } %>
 													</div>
 													<% if (user && user.role==="admin" ) { %>
 														<div class="row mt-2">

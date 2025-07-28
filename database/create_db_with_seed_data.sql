@@ -156,13 +156,13 @@ INSERT INTO food_items (name, price, description, stall_id, image_url) VALUES
 ('Roasted Pork Rice', 6.00, 'Crispy roasted pork served with rice and dark sauce.', 1, 'roastedpork.jpg');
 
 -- Reviews
-INSERT INTO reviews (user_id, stall_id, rating, comment) VALUES
-(1, 1, 5, 'The best chicken rice in Singapore! Long queue but worth it.'),
-(2, 3, 4, 'Great satay, very smoky. Peanut sauce is on point!'),
-(1, 4, 3, 'Decent fishball noodles, soup could be richer.'),
-(3, 5, 5, 'Authentic Katong Laksa, loved the rich broth and fresh ingredients.'),
-(2, 1, 4, 'Always a classic, consistent quality. A must-try for tourists.'),
-(1, 2, 5, 'Fantastic curry! The spices are just right, not overly spicy.');
+INSERT INTO reviews (user_id, stall_id, rating, comment, image_url) VALUES
+(1, 1, 5, 'The best chicken rice in Singapore! Long queue but worth it.', 'review_chicken_rice_1.jpg'),
+(2, 3, 4, 'Great satay, very smoky. Peanut sauce is on point!', 'review_satay_1.jpg'),
+(1, 4, 3, 'Decent fishball noodles, soup could be richer.', NULL),
+(3, 5, 5, 'Authentic Katong Laksa, loved the rich broth and fresh ingredients.', 'review_laksa_1.jpg'),
+(2, 1, 4, 'Always a classic, consistent quality. A must-try for tourists.', NULL),
+(1, 2, 5, 'Fantastic curry! The spices are just right, not overly spicy.', 'review_curry_1.jpg');
 
 -- Recommendations
 INSERT INTO recommendations (user_id, stall_id, food_id, tip) VALUES
