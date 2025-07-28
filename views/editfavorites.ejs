@@ -12,7 +12,7 @@
   <%- include('partials/flash-messages') %>
   <div class="container mt-4">
     <h2><i class="bi bi-pencil-square"></i> Edit Favorite</h2>
-    <form action="/favorites/edit/<%= favorite.id %>" method="POST" class="mt-3">
+    <form action="/favorites/update/<%= favorite.id %>" method="POST" class="mt-3">
       <div class="mb-3">
         <label for="stall_id" class="form-label">Stall</label>
         <select class="form-select" id="stall_id" name="stall_id" required>
@@ -22,11 +22,11 @@
         </select>
       </div>
       <div class="mb-3">
-        <label for="food_id" class="form-label">Food Item</label>
+        <label for="food_id" class="form-label">Food Item (optional)</label>
         <select class="form-select" id="food_id" name="food_id">
-          <option value="">None</option>
+          <option value="">-- Select a food item --</option>
           <% foodItems.forEach(food => { %>
-            <option value="<%= food.id %>" <%= food.id === favorite.food_id ? "selected" : "" %>><%= food.name %></option>
+            <option value="<%= food.id %>" data-stall-id="<%= food.stall_id %>" <%= food.id === favorite.food_id ? "selected" : "" %>><%= food.name %></option>
           <% }) %>
         </select>
       </div>
@@ -38,5 +38,52 @@
       <a href="/favorites" class="btn btn-secondary ms-2">Cancel</a>
     </form>
   </div>
+
+  <script>
+    // Food item filtering based on selected stall
+    const stallSelect = document.getElementById('stall_id');
+    const foodSelect = document.getElementById('food_id');
+    const initialStallId = stallSelect.value;
+    const initialFoodId = '<%= favorite.food_id || "" %>';
+
+    function filterFoodItems() {
+      const selectedStallId = stallSelect.value;
+      const currentFoodId = foodSelect.value;
+      
+      // Store all options if not already stored
+      if (!foodSelect.allOptions) {
+        foodSelect.allOptions = Array.from(foodSelect.options);
+      }
+      
+      // Clear current options
+      foodSelect.innerHTML = '<option value="">-- Select a food item --</option>';
+      
+      // Add options that match the selected stall
+      foodSelect.allOptions.forEach(option => {
+        if (!option.value) return; // Skip the empty option
+        
+        const optionStallId = option.getAttribute('data-stall-id');
+        if (optionStallId === selectedStallId) {
+          foodSelect.appendChild(option.cloneNode(true));
+        }
+      });
+      
+      // Restore food selection if it belongs to the current stall
+      if (currentFoodId) {
+        const matchingOption = Array.from(foodSelect.options).find(opt => opt.value === currentFoodId);
+        if (matchingOption) {
+          foodSelect.value = currentFoodId;
+        }
+      }
+    }
+
+    // Initial filtering when page loads
+    filterFoodItems();
+
+    // Filter when stall selection changes
+    stallSelect.addEventListener('change', function() {
+      filterFoodItems();
+    });
+  </script>
 </body>
 </html>
