@@ -361,6 +361,7 @@ app.get(
 );
 
 app.get("/stalls", (req, res) => {
+	//const { name, locations, facilities} = req.query;
 	res.render("stalls", {
 		title: "Stalls - Hawker Hero",
 		user: req.session.user,
@@ -369,15 +370,115 @@ app.get("/stalls", (req, res) => {
 	});
 });
 
-app.get("/hawker-centers", (req, res) => {
-	res.render("hawker-centers", {
-		title: "Hawker Centers - Hawker Hero",
-		user: req.session.user,
-		messages: req.flash("success"),
-		centers: [],
-	});
+let hawkerCenters = [
+    { "id": "1", "name": "Maxwell Food Centre", "address": "1 Kadayanallur St, Singapore 069184", "facilities": ["Toilets", "Wifi", "Air-conditioned"] },
+    { "id": "2", "name": "Newton Food Centre", "address": "500 Clemenceau Ave N, Singapore 229495", "facilities": ["Toilets", "Seating", "Parking"] },
+    { "id": "3", "name": "Old Airport Road Food Centre", "address": "51 Old Airport Rd, Singapore 390051", "facilities": ["Toilets", "Seating", "Parking", "Wet market"] },
+    { "id": "4", "name": "Tiong Bahru Market", "address": "30 Seng Poh Rd, Singapore 168898", "facilities": ["Toilets", "Seating", "Hawker stalls", "Wet market"] }
+];
+
+const checkAdminRole = (req, res, next) => {
+    if (req.headers.role === 'admin') {
+        next();
+    } else {
+        res.status(403).send(' Access denied. Admin Only.');
+    }
+};
+
+
+// View all hawker centers 
+app.get('/hawker_centers', (req, res) => {
+    const query = 'SELECT id, name, address, facilities FROM hawker_centers';
+    connection.query(query, (error, results) => {
+        if (error) {
+            res.status(500).send('Database error: Failed to fetch hawker centers.');
+        } else {
+            res.json(results);
+        }
+    });
 });
 
+// Search centers
+app.get('/hawker_centers/search', (req, res) => {
+    const { name, location } = req.query;
+
+    let query = 'SELECT id, name, address, facilities FROM hawker_centers WHERE 1=1';
+    const params = [];
+
+    if (name) {
+        query += ' AND name LIKE ?';
+        params.push('%' + name + '%');
+    }
+
+    if (location) {
+        query += ' AND address LIKE ?';
+        params.push('%' + location + '%');
+    }
+
+    connection.query(query, params, (error, results) => {
+        if (error) {
+            res.status(500).send('Database error: Failed to search for hawker centers.');
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+// Add new hawker center 
+app.post('/hawker_centers', checkAdminRole, (req, res) => {
+    const { name, address, facilities } = req.body;
+    
+    if (!name || !address) {
+        return res.status(400).send('Name and address are required.');
+    }
+
+    const query = 'INSERT INTO hawker_centers (name, address, facilities) VALUES (?, ?, ?)';
+    connection.query(query, [name, address, JSON.stringify(facilities)], (error, results) => {
+        if (error) {
+            console.error('Error adding hawker center:', error);
+            res.status(500).send('Failed to add hawker center.');
+        } else {
+            res.status(201).send(`New hawker center added with ID: ${results.insertId}`);
+        }
+    });
+});
+
+// Edit center details 
+app.post('/hawker_centers/:id', checkAdminRole, (req, res) => {
+    const { id } = req.params;
+    const { name, address, facilities } = req.body;
+    
+    const query = 'UPDATE hawker_centers SET name = ?, address = ?, facilities = ? WHERE id = ?';
+    const params = [name, address, JSON.stringify(facilities), id];
+
+    connection.query(query, params, (error, results) => {
+        if (error) {
+            console.error('Error updating hawker center:', error);
+            res.status(500).send('Failed to update hawker center.');
+        } else if (results.affectedRows === 0) {
+            res.status(404).send('Hawker center not found.');
+        } else {
+            res.send(`Hawker center with ID ${id} updated successfully.`);
+        }
+    });
+});
+
+// Delete center 
+app.post('/hawker_centers/delete/:id', checkAdminRole, (req, res) => {
+    const { id } = req.params;
+    
+    const query = 'DELETE FROM hawker_centers WHERE id = ?';
+    connection.query(query, [id], (error, results) => {
+        if (error) {
+            console.error('Error deleting hawker center:', error);
+            res.status(500).send('Failed to delete hawker center.');
+        } else if (results.affectedRows === 0) {
+            res.status(404).send('Hawker center not found.');
+        } else {
+            res.send(`Hawker center with ID ${id} deleted successfully.`);
+        }
+    });
+});
 app.get("/reviews", (req, res) => {
 	res.render("reviews", {
 		title: "Reviews - Hawker Hero",
