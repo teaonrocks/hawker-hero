@@ -31,9 +31,9 @@
 				<!-- Stall Information -->
 				<div class="col-md-8">
 					<div class="card">
-						<% if (stall.image) { %>
+						<% if (stall.image_url) { %>
 						<img
-							src="/images/stalls/<%= stall.image %>"
+							src="/images/<%= stall.image_url %>"
 							class="card-img-top"
 							alt="<%= stall.name %>"
 							style="height: 300px; object-fit: cover"
