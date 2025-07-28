@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/database");
+const { queryDB } = require("../utils/helpers");
 const { validateRegistration } = require("../middleware/validation");
 const { checkAuthenticated, checkAdmin } = require("../middleware/auth");
 
@@ -107,13 +108,135 @@ router.post("/login", (req, res) => {
 });
 
 // Dashboard and admin routes
-router.get("/dashboard", checkAuthenticated, (req, res) => {
-	res.render("dashboard", {
-		title: "Dashboard - Hawker Hero",
-		user: req.session.user,
-		messages: req.flash("success"),
-		errors: req.flash("error"),
-	});
+router.get("/dashboard", checkAuthenticated, async (req, res) => {
+	const userId = req.session.user.id;
+	
+	try {
+		// Get user statistics
+		const [reviewsCount] = await queryDB(
+			"SELECT COUNT(*) as count FROM reviews WHERE user_id = ?", 
+			[userId]
+		);
+		
+		const [favoritesCount] = await queryDB(
+			"SELECT COUNT(*) as count FROM favorites WHERE user_id = ?", 
+			[userId]
+		);
+		
+		const [recommendationsCount] = await queryDB(
+			"SELECT COUNT(*) as count FROM recommendations WHERE user_id = ?", 
+			[userId]
+		);
+
+		// Get recent reviews (last 3)
+		const recentReviews = await queryDB(`
+			SELECT r.*, s.name as stall_name, s.location, hc.name as center_name
+			FROM reviews r
+			JOIN stalls s ON r.stall_id = s.id
+			LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+			WHERE r.user_id = ?
+			ORDER BY r.created_at DESC
+			LIMIT 3
+		`, [userId]);
+
+		// Get recent favorites (last 3)
+		const recentFavorites = await queryDB(`
+			SELECT f.*, s.name as stall_name, s.location, hc.name as center_name,
+				   fi.name as food_name
+			FROM favorites f
+			LEFT JOIN stalls s ON f.stall_id = s.id
+			LEFT JOIN hawker_centers hc ON s.center_id = hc.id
+			LEFT JOIN food_items fi ON f.food_id = fi.id
+			WHERE f.user_id = ?
+			ORDER BY f.created_at DESC
+			LIMIT 3
+		`, [userId]);
+
+		// Get recent recommendations (last 3)
+		const recentRecommendations = await queryDB(`
+			SELECT rc.*, s.name as stall_name, fi.name as food_name
+			FROM recommendations rc
+			JOIN stalls s ON rc.stall_id = s.id
+			LEFT JOIN food_items fi ON rc.food_id = fi.id
+			WHERE rc.user_id = ?
+			ORDER BY rc.created_at DESC
+			LIMIT 3
+		`, [userId]);
+
+		// Get recent activity (combined from reviews, favorites, recommendations)
+		const recentActivity = [];
+
+		// Add recent reviews to activity
+		recentReviews.forEach(review => {
+			recentActivity.push({
+				type: 'review',
+				icon: 'bi-star-fill text-warning',
+				text: `You reviewed <strong>${review.stall_name}</strong>`,
+				date: review.created_at,
+				details: review.rating + ' stars'
+			});
+		});
+
+		// Add recent favorites to activity
+		recentFavorites.forEach(favorite => {
+			const itemName = favorite.food_name || favorite.stall_name;
+			recentActivity.push({
+				type: 'favorite',
+				icon: 'bi-heart-fill text-danger',
+				text: `You added <strong>${itemName}</strong> to favorites`,
+				date: favorite.created_at,
+				details: favorite.notes ? `Note: ${favorite.notes}` : null
+			});
+		});
+
+		// Add recent recommendations to activity
+		recentRecommendations.forEach(rec => {
+			recentActivity.push({
+				type: 'recommendation',
+				icon: 'bi-lightbulb-fill text-success',
+				text: `You shared a recommendation for <strong>${rec.stall_name}</strong>`,
+				date: rec.created_at,
+				details: rec.tip.substring(0, 50) + (rec.tip.length > 50 ? '...' : '')
+			});
+		});
+
+		// Sort activity by date (most recent first) and limit to 5
+		recentActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
+		const limitedActivity = recentActivity.slice(0, 5);
+
+		res.render("dashboard", {
+			title: "Dashboard - Hawker Hero",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			stats: {
+				reviewsCount: reviewsCount.count,
+				favoritesCount: favoritesCount.count,
+				recommendationsCount: recommendationsCount.count
+			},
+			recentReviews,
+			recentFavorites,
+			recentRecommendations,
+			recentActivity: limitedActivity
+		});
+	} catch (error) {
+		console.error("Dashboard error:", error);
+		res.render("dashboard", {
+			title: "Dashboard - Hawker Hero",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error").concat("Failed to load dashboard data"),
+			stats: {
+				reviewsCount: 0,
+				favoritesCount: 0,
+				recommendationsCount: 0
+			},
+			recentReviews: [],
+			recentFavorites: [],
+			recentRecommendations: [],
+			recentActivity: []
+		});
+	}
 });
 
 router.get("/admin", checkAuthenticated, checkAdmin, (req, res) => {
