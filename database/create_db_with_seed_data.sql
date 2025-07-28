@@ -76,6 +76,7 @@ CREATE TABLE reviews (
     stall_id INT NOT NULL, -- FK to stalls
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5), -- Rating 1-5
     comment TEXT,
+    image_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (stall_id) REFERENCES stalls(id) ON DELETE CASCADE ON UPDATE CASCADE

@@ -132,9 +132,11 @@
 												<div class="col-md-4 text-center">
 													<div class="bg-light rounded d-flex align-items-center justify-content-center overflow-hidden"
 														style="height: 120px">
-														<img src="<%= review.image_url %>"
-															alt="<%= review.stall_name %>" class="img-fluid"
-															style="max-height: 100%; object-fit: cover;">
+														<% if (review.image_url) { %>
+															<img src="<%= review.image_url %>" alt="Review Image"
+																style="max-width: 300px;">
+															<% } %>
+
 													</div>
 													<% if (user && user.role==="admin" ) { %>
 														<div class="row mt-2">
