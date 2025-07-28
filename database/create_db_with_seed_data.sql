@@ -147,12 +147,12 @@ INSERT INTO stalls (name, location, cuisine_type, center_id, opening_hours, imag
 
 -- Food Items (linked to Stalls)
 INSERT INTO food_items (name, price, description, stall_id, image_url) VALUES
-('Chicken Rice Set', 5.50, 'Steamed chicken with fragrant rice and chili sauce.', 1, 'https://example.com/chickenrice.jpg'),
-('Curry Chicken', 7.00, 'Rich and spicy chicken curry with potatoes.', 2, 'https://example.com/currychicken.jpg'),
-('Mutton Satay (10 sticks)', 8.00, 'Grilled mutton skewers with peanut sauce.', 3, 'https://example.com/muttonsatay.jpg'),
-('Fishball Noodles', 4.00, 'Springy noodles with fishballs and minced meat.', 4, 'https://example.com/fishballnoodles.jpg'),
-('Katong Laksa', 6.50, 'Spicy coconut milk-based noodle soup with prawns and fish cake.', 5, 'https://example.com/laksaitem.jpg'),
-('Roasted Pork Rice', 6.00, 'Crispy roasted pork served with rice and dark sauce.', 1, 'https://example.com/roastedpork.jpg');
+('Chicken Rice Set', 5.50, 'Steamed chicken with fragrant rice and chili sauce.', 1, 'chickenrice.jpg'),
+('Curry Chicken', 7.00, 'Rich and spicy chicken curry with potatoes.', 2, 'currychicken.jpg'),
+('Mutton Satay (10 sticks)', 8.00, 'Grilled mutton skewers with peanut sauce.', 3, 'muttonsatay.jpg'),
+('Fishball Noodles', 4.00, 'Springy noodles with fishballs and minced meat.', 4, 'fishballnoodles.jpg'),
+('Katong Laksa', 6.50, 'Spicy coconut milk-based noodle soup with prawns and fish cake.', 5, 'laksa.jpg'),
+('Roasted Pork Rice', 6.00, 'Crispy roasted pork served with rice and dark sauce.', 1, 'roastedpork.jpg');
 
 -- Reviews
 INSERT INTO reviews (user_id, stall_id, rating, comment) VALUES
