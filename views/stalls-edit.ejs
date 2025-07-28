@@ -28,7 +28,7 @@
 						</div>
 						<div class="card-body">
 							<!-- Fixed: Proper method override for PUT -->
-							<form method="POST" action="/stalls/<%= stall.id %>?_method=PUT">
+							<form method="POST" action="/stalls/<%= stall.id %>?_method=PUT" enctype="multipart/form-data">
 								<div class="mb-3">
 									<label for="name" class="form-label"
 										>Stall Name <span class="text-danger">*</span></label
@@ -58,32 +58,61 @@
 								</div>
 
 								<div class="mb-3">
-									<label for="cuisine" class="form-label"
+									<label for="cuisine_type" class="form-label"
 										>Cuisine Type <span class="text-danger">*</span></label
 									>
 									<input
 										type="text"
-										name="cuisine"
-										id="cuisine"
+										name="cuisine_type"
+										id="cuisine_type"
 										class="form-control"
-										value="<%= stall.cuisine %>"
+										value="<%= stall.cuisine_type %>"
 										required
 									/>
 								</div>
 
-								<% if (stall.image) { %>
 								<div class="mb-3">
-									<label class="form-label">Current Image</label>
-									<div>
+									<label for="center_id" class="form-label"
+										>Hawker Center <span class="text-danger">*</span></label
+									>
+									<select name="center_id" id="center_id" class="form-select" required>
+										<option value="">Select a hawker center</option>
+										<% if (centers && centers.length > 0) { %>
+											<% centers.forEach(center => { %>
+											<option value="<%= center.id %>" <%= stall.center_id == center.id ? 'selected' : '' %>><%= center.name %></option>
+											<% }); %>
+										<% } %>
+									</select>
+								</div>
+
+								<div class="mb-3">
+									<label for="opening_hours" class="form-label">Opening Hours</label>
+									<input
+										type="text"
+										name="opening_hours"
+										id="opening_hours"
+										class="form-control"
+										value="<%= stall.opening_hours || '' %>"
+										placeholder="e.g., 9:00 AM - 6:00 PM"
+									/>
+								</div>
+
+								<div class="mb-3">
+									<label for="image" class="form-label">Image</label>
+									<% if (stall.image_url) { %>
+									<div class="mb-2">
 										<img
-											src="/images/stalls/<%= stall.image %>"
+											src="/images/<%= stall.image_url %>"
 											alt="<%= stall.name %>"
 											class="img-thumbnail"
 											style="max-width: 200px"
 										/>
+										<div class="form-text">Current image</div>
 									</div>
+									<% } %>
+									<input type="file" class="form-control" id="image" name="image" accept="image/*">
+									<div class="form-text">Leave empty to keep current image</div>
 								</div>
-								<% } %>
 
 								<div class="d-grid gap-2 d-md-flex justify-content-md-end">
 									<a href="/stalls" class="btn btn-secondary me-md-2">

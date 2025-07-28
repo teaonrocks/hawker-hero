@@ -58,18 +58,55 @@
 								</div>
 
 								<div class="mb-3">
-									<label for="cuisine" class="form-label"
+									<label for="cuisine_type" class="form-label"
 										>Cuisine Type <span class="text-danger">*</span></label
 									>
 									<input
 										type="text"
 										class="form-control"
-										name="cuisine"
-										id="cuisine"
+										name="cuisine_type"
+										id="cuisine_type"
 										required
 									/>
 									<div class="form-text">
 										e.g., Chinese, Malay, Indian, Western
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<label for="center_id" class="form-label"
+										>Hawker Center <span class="text-danger">*</span></label
+									>
+									<select
+										name="center_id"
+										id="center_id"
+										class="form-select"
+										required
+									>
+										<option value="">Select a hawker center</option>
+										<% if (centers && centers.length > 0) { %> <%
+										centers.forEach(center => { %>
+										<option value="<%= center.id %>"><%= center.name %></option>
+										<% }); %> <% } %>
+									</select>
+									<div class="form-text">
+										Select the hawker center where this stall is located
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<label for="opening_hours" class="form-label"
+										>Opening Hours</label
+									>
+									<input
+										type="text"
+										class="form-control"
+										name="opening_hours"
+										id="opening_hours"
+										placeholder="e.g., 9:00 AM - 6:00 PM"
+									/>
+									<div class="form-text">
+										Enter the operating hours (optional)
 									</div>
 								</div>
 

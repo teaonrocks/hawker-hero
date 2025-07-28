@@ -53,10 +53,21 @@
 								<i class="bi bi-geo-alt text-primary"></i>
 								<strong>Location:</strong> <%= stall.location %>
 							</p>
+							<% if (stall.center_name) { %>
+							<p class="card-text">
+								<i class="bi bi-building text-info"></i>
+								<strong>Hawker Center:</strong> <%= stall.center_name %>
+							</p>
+							<% } %> <% if (stall.opening_hours) { %>
+							<p class="card-text">
+								<i class="bi bi-clock text-warning"></i>
+								<strong>Opening Hours:</strong> <%= stall.opening_hours %>
+							</p>
+							<% } %>
 							<p class="card-text">
 								<i class="bi bi-tag text-success"></i>
 								<strong>Cuisine:</strong>
-								<span class="badge bg-primary"><%= stall.cuisine %></span>
+								<span class="badge bg-primary"><%= stall.cuisine_type %></span>
 							</p>
 
 							<!-- Favorite Button -->
@@ -156,8 +167,13 @@
 						</div>
 						<div class="card-body">
 							<p><strong>Stall ID:</strong> #<%= stall.id %></p>
-							<p><strong>Cuisine:</strong> <%= stall.cuisine %></p>
+							<p><strong>Cuisine:</strong> <%= stall.cuisine_type %></p>
 							<p><strong>Location:</strong> <%= stall.location %></p>
+							<% if (stall.center_name) { %>
+							<p><strong>Hawker Center:</strong> <%= stall.center_name %></p>
+							<% } %> <% if (stall.opening_hours) { %>
+							<p><strong>Opening Hours:</strong> <%= stall.opening_hours %></p>
+							<% } %>
 						</div>
 					</div>
 				</div>

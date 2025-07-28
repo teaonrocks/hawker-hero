@@ -39,7 +39,12 @@ router.get("/stalls", (req, res) => {
 
 		const cuisineList = cuisineResults;
 
-		let sql = "SELECT * FROM stalls WHERE 1=1";
+		let sql = `
+			SELECT s.*, hc.name as center_name 
+			FROM stalls s 
+			LEFT JOIN hawker_centers hc ON s.center_id = hc.id 
+			WHERE 1=1
+		`;
 		const params = [];
 
 		if (search) {
@@ -48,7 +53,7 @@ router.get("/stalls", (req, res) => {
 		}
 
 		if (cuisine) {
-			sql += " AND cuisine = ?";
+			sql += " AND cuisine_type = ?";
 			params.push(cuisine);
 		}
 
@@ -88,13 +93,30 @@ router.get("/stalls", (req, res) => {
 });
 
 // Show form to create new stall (Admin only)
-router.get("/stalls/new", checkAuthenticated, checkAdmin, (req, res) => {
-	res.render("stalls-new", {
-		title: "Add Stall",
-		user: req.session.user,
-		messages: req.flash("success"),
-		errors: req.flash("error"),
-	});
+router.get("/stalls/new", checkAuthenticated, checkAdmin, async (req, res) => {
+	try {
+		// Get hawker centers for the dropdown
+		const centers = await queryDB(
+			"SELECT id, name FROM hawker_centers ORDER BY name ASC"
+		);
+
+		res.render("stalls-new", {
+			title: "Add Stall",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			centers: centers,
+		});
+	} catch (err) {
+		console.error("Error loading centers:", err);
+		res.render("stalls-new", {
+			title: "Add Stall",
+			user: req.session.user,
+			messages: req.flash("success"),
+			errors: req.flash("error"),
+			centers: [],
+		});
+	}
 });
 
 // Create new stall (Admin only)
@@ -104,18 +126,28 @@ router.post(
 	checkAdmin,
 	upload.single("image"),
 	(req, res) => {
-		const { name, location, cuisine } = req.body;
-		const image = req.file ? req.file.filename : null;
+		const { name, location, cuisine_type, center_id, opening_hours } = req.body;
+		const image_url = req.file ? req.file.filename : null;
 
 		// Validation
-		if (!name || !location || !cuisine) {
-			req.flash("error", "All fields (name, location, cuisine) are required");
+		if (!name || !location || !cuisine_type || !center_id) {
+			req.flash(
+				"error",
+				"Name, location, cuisine type, and hawker center are required"
+			);
 			return res.redirect("/stalls/new");
 		}
 
 		db.query(
-			"INSERT INTO stalls (name, location, cuisine, image) VALUES (?, ?, ?, ?)",
-			[name, location, cuisine, image],
+			"INSERT INTO stalls (name, location, cuisine_type, center_id, opening_hours, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+			[
+				name,
+				location,
+				cuisine_type,
+				center_id,
+				opening_hours || null,
+				image_url,
+			],
 			(err) => {
 				if (err) {
 					console.error("Error creating stall:", err);
@@ -135,7 +167,12 @@ router.get("/stalls/:id", async (req, res) => {
 	const { id } = req.params;
 
 	try {
-		const stallSql = "SELECT * FROM stalls WHERE id = ?";
+		const stallSql = `
+			SELECT s.*, hc.name as center_name 
+			FROM stalls s 
+			LEFT JOIN hawker_centers hc ON s.center_id = hc.id 
+			WHERE s.id = ?
+		`;
 		const [stall] = await queryDB(stallSql, [id]);
 
 		if (!stall) {
@@ -163,45 +200,88 @@ router.get("/stalls/:id", async (req, res) => {
 });
 
 // Show edit form for stall (Admin only)
-router.get("/stalls/:id/edit", checkAuthenticated, checkAdmin, (req, res) => {
-	const { id } = req.params;
-	db.query("SELECT * FROM stalls WHERE id = ?", [id], (err, results) => {
-		if (err) {
+router.get(
+	"/stalls/:id/edit",
+	checkAuthenticated,
+	checkAdmin,
+	async (req, res) => {
+		const { id } = req.params;
+
+		try {
+			const [stall, centers] = await Promise.all([
+				queryDB("SELECT * FROM stalls WHERE id = ?", [id]),
+				queryDB("SELECT id, name FROM hawker_centers ORDER BY name ASC"),
+			]);
+
+			if (!stall.length) {
+				req.flash("error", "Stall not found.");
+				return res.redirect("/stalls");
+			}
+
+			res.render("stalls-edit", {
+				stall: stall[0],
+				title: "Edit Stall",
+				user: req.session.user,
+				messages: req.flash("success"),
+				errors: req.flash("error"),
+				centers: centers,
+			});
+		} catch (err) {
 			console.error("Error fetching stall for edit:", err);
 			req.flash("error", "Failed to load stall for editing");
-			return res.redirect("/stalls");
+			res.redirect("/stalls");
 		}
-
-		if (!results.length) {
-			req.flash("error", "Stall not found.");
-			return res.redirect("/stalls");
-		}
-
-		res.render("stalls-edit", {
-			stall: results[0],
-			title: "Edit Stall",
-			user: req.session.user,
-			messages: req.flash("success"),
-			errors: req.flash("error"),
-		});
-	});
-});
+	}
+);
 
 // Update stall (Admin only)
-router.put("/stalls/:id", checkAuthenticated, checkAdmin, (req, res) => {
-	const { id } = req.params;
-	const { name, location, cuisine } = req.body;
+router.put(
+	"/stalls/:id",
+	checkAuthenticated,
+	checkAdmin,
+	upload.single("image"),
+	(req, res) => {
+		const { id } = req.params;
+		const { name, location, cuisine_type, center_id, opening_hours } = req.body;
+		const image_url = req.file ? req.file.filename : null;
 
-	// Validation
-	if (!name || !location || !cuisine) {
-		req.flash("error", "All fields (name, location, cuisine) are required");
-		return res.redirect(`/stalls/${id}/edit`);
-	}
+		// Validation
+		if (!name || !location || !cuisine_type || !center_id) {
+			req.flash(
+				"error",
+				"Name, location, cuisine type, and hawker center are required"
+			);
+			return res.redirect(`/stalls/${id}/edit`);
+		}
 
-	db.query(
-		"UPDATE stalls SET name = ?, location = ?, cuisine = ? WHERE id = ?",
-		[name, location, cuisine, id],
-		(err, result) => {
+		let updateSql, params;
+
+		if (image_url) {
+			updateSql =
+				"UPDATE stalls SET name = ?, location = ?, cuisine_type = ?, center_id = ?, opening_hours = ?, image_url = ? WHERE id = ?";
+			params = [
+				name,
+				location,
+				cuisine_type,
+				center_id,
+				opening_hours || null,
+				image_url,
+				id,
+			];
+		} else {
+			updateSql =
+				"UPDATE stalls SET name = ?, location = ?, cuisine_type = ?, center_id = ?, opening_hours = ? WHERE id = ?";
+			params = [
+				name,
+				location,
+				cuisine_type,
+				center_id,
+				opening_hours || null,
+				id,
+			];
+		}
+
+		db.query(updateSql, params, (err, result) => {
 			if (err) {
 				console.error("Error updating stall:", err);
 				req.flash("error", "Failed to update stall. Please try again.");
@@ -215,9 +295,9 @@ router.put("/stalls/:id", checkAuthenticated, checkAdmin, (req, res) => {
 
 			req.flash("success", "Stall updated successfully!");
 			res.redirect("/stalls");
-		}
-	);
-});
+		});
+	}
+);
 
 // Delete stall (Admin only)
 router.delete(

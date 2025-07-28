@@ -29,8 +29,8 @@
           <option value="">All Cuisines</option>
           <% if (Array.isArray(cuisines) && cuisines.length > 0) { %>
             <% cuisines.forEach(c => { %>
-              <!-- Fixed: Access the cuisine property from the object -->
-              <option value="<%= c.cuisine %>" <%= query?.cuisine === c.cuisine ? 'selected' : '' %>><%= c.cuisine %></option>
+              <!-- Fixed: Access the cuisine_type property from the object -->
+              <option value="<%= c.cuisine_type %>" <%= query?.cuisine === c.cuisine_type ? 'selected' : '' %>><%= c.cuisine_type %></option>
             <% }) %>
           <% } else { %>
             <option disabled>No cuisines found</option>
@@ -65,7 +65,12 @@
                 <small class="text-muted">
                   <i class="bi bi-geo-alt"></i> <%= stall.location %>
                 </small><br />
-                <span class="badge bg-primary"><%= stall.cuisine %></span>
+                <% if (stall.center_name) { %>
+                <small class="text-muted">
+                  <i class="bi bi-building"></i> <%= stall.center_name %>
+                </small><br />
+                <% } %>
+                <span class="badge bg-primary"><%= stall.cuisine_type %></span>
               </p>
               <% if (stall.rating) { %>
                 <div class="text-warning mb-2">
