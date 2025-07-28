@@ -5,17 +5,16 @@ const db = require("../config/database");
 const { queryDB } = require("../utils/helpers");
 const { checkAuthenticated, checkAdmin } = require("../middleware/auth");
 
-// Setup for file uploads
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, "public/images/stalls");
+		cb(null, "public/images");
 	},
 	filename: (req, file, cb) => {
-		const uniqueName = Date.now() + "-" + file.originalname;
-		cb(null, uniqueName);
+		cb(null, file.originalname);
 	},
 });
-const upload = multer({ storage });
+
+const upload = multer({ storage: storage });
 
 // List all stalls with filtering
 router.get("/stalls", (req, res) => {

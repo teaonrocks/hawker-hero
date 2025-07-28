@@ -134,17 +134,17 @@ INSERT INTO users (username, email, password_hash, role) VALUES
 
 -- Hawker Centers
 INSERT INTO hawker_centers (name, address, facilities, image_url) VALUES
-('Maxwell Food Centre', '1 Kadayanallur St, Singapore 069184', 'Toilets, Seating, Open-air, Variety', 'https://example.com/maxwell.jpg'),
-('Tiong Bahru Market', '30 Seng Poh Rd, Singapore 168898', 'Toilets, Seating, Wet Market, Iconic', 'https://example.com/tiongbahru.jpg'),
-('Old Airport Road Food Centre', '51 Old Airport Rd, Singapore 390051', 'Toilets, Seating, Huge Variety, Parking', 'https://example.com/oldairportroad.jpg');
+('Maxwell Food Centre', '1 Kadayanallur St, Singapore 069184', 'Toilets, Seating, Open-air, Variety', 'maxwell-food-centre.jpg'),
+('Tiong Bahru Market', '30 Seng Poh Rd, Singapore 168898', 'Toilets, Seating, Wet Market, Iconic', 'tiongbahrumarket.jpg'),
+('Old Airport Road Food Centre', '51 Old Airport Rd, Singapore 390051', 'Toilets, Seating, Huge Variety, Parking', 'oldairportroadfoodcenter');
 
 -- Stalls (linked to Hawker Centers)
 INSERT INTO stalls (name, location, cuisine_type, center_id, opening_hours, image_url) VALUES
-('Tian Tian Hainanese Chicken Rice', '#01-10/11 Maxwell Food Centre', 'Hainanese', 1, '10:00 AM - 7:00 PM (Closed Mon)', 'https://example.com/tiantian.jpg'),
-('Authentic Curry', '#01-05 Tiong Bahru Market', 'Indian', 2, '9:00 AM - 8:00 PM', 'https://example.com/curry.jpg'),
-('Famous Satay', '#01-15 Old Airport Road Food Centre', 'Malay', 3, '11:00 AM - 10:00 PM', 'https://example.com/satay.jpg'),
-('Handmade Noodles', '#01-20 Maxwell Food Centre', 'Chinese', 1, '9:30 AM - 6:30 PM', 'https://example.com/noodles.jpg'),
-('Traditional Laksa', '#01-30 Old Airport Road Food Centre', 'Peranakan', 3, '8:00 AM - 5:00 PM', 'https://example.com/laksa.jpg');
+('Tian Tian Hainanese Chicken Rice', '#01-10/11 Maxwell Food Centre', 'Hainanese', 1, '10:00 AM - 7:00 PM (Closed Mon)', 'tiantianhainanesechickenrice.jpg'),
+('Authentic Curry', '#01-05 Tiong Bahru Market', 'Indian', 2, '9:00 AM - 8:00 PM', 'authenticcurry.jpg'),
+('Famous Satay', '#01-15 Old Airport Road Food Centre', 'Malay', 3, '11:00 AM - 10:00 PM', 'famoussatay.jpg'),
+('Handmade Noodles', '#01-20 Maxwell Food Centre', 'Chinese', 1, '9:30 AM - 6:30 PM', 'homemadenoodles.jpg'),
+('Traditional Laksa', '#01-30 Old Airport Road Food Centre', 'Peranakan', 3, '8:00 AM - 5:00 PM', 'traditionallaksa.jpg');
 
 -- Food Items (linked to Stalls)
 INSERT INTO food_items (name, price, description, stall_id, image_url) VALUES
