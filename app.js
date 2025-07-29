@@ -22,6 +22,9 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(express.static("public")); // Serve static files from public directory
 app.set("view engine", "ejs"); // Set EJS as the template engine
 
+// Method override middleware for handling PUT/DELETE requests from forms
+app.use(methodOverride("_method"));
+
 // Session configuration for user authentication and state management
 app.use(
 	session({
