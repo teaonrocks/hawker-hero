@@ -48,17 +48,17 @@ router.get("/stalls", (req, res) => {
 		const params = [];
 
 		if (search) {
-			sql += " AND name LIKE ?";
+			sql += " AND s.name LIKE ?";
 			params.push(`%${search}%`);
 		}
 
 		if (cuisine) {
-			sql += " AND cuisine_type = ?";
+			sql += " AND s.cuisine_type = ?";
 			params.push(cuisine);
 		}
 
 		if (location) {
-			sql += " AND location LIKE ?";
+			sql += " AND s.location LIKE ?";
 			params.push(`%${location}%`);
 		}
 
